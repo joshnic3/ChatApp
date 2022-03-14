@@ -1,6 +1,8 @@
 import random
 from datetime import datetime
+
 import bleach
+
 
 def new_chat_manager(dao, display_name, max_users=10):
     created = datetime.now()
@@ -129,6 +131,8 @@ class Chat:
         self.display_name = None
         self.max_users = None
         self.created = None
+        # TODO Make this a user toggleable item. Needs to be False as default
+        self.invite_only = False
         self.users = {}
         self.messages = []
 

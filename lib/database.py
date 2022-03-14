@@ -10,7 +10,7 @@ def _wildcards(values):
 
 
 def _where_sql(keys):
-    return f' WHERE {", ".join([f"{k} = ?" for k in keys])}'
+    return f' WHERE {" AND ".join([f"{k} = ?" for k in keys])}'
 
 
 class DAO:

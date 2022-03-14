@@ -32,3 +32,10 @@ sql:
             "value"	datetime,
             PRIMARY KEY("id" AUTOINCREMENT)
           );'
+  invites: 'CREATE TABLE "invites" (
+            "id"	INTEGER NOT NULL UNIQUE,
+            "chat_id"	varchar(16) NOT NULL,
+            "issued"  datetime,
+            "key"	varchar(255),
+            PRIMARY KEY("id" AUTOINCREMENT)
+          );'

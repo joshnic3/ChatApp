@@ -10,7 +10,10 @@ from flask_socketio import SocketIO, join_room, leave_room
 
 from lib.chat import User, ChatManager, new_chat_manager
 from lib.database import DAO
-from lib.utils import HashManager, SHAKE256_3, SHA256
+from lib.invites import InviteManager
+from lib.hashing import HashManager, SHAKE256_3, SHA256
+
+import urllib.parse
 
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
@@ -26,6 +29,7 @@ socket_io = SocketIO(app)
 
 dao = DAO(DB_PATH)
 hm = HashManager(dao)
+im = InviteManager(dao)
 
 chat_managers = {}
 
@@ -117,6 +121,19 @@ def leave():
         return make_response({'removed': True})
 
 
+@app.route('/api/invite', methods=['POST'])
+def generate_invite():
+    data = request.get_json()
+    chat_id_hash = data.get('chat_id')
+    cm = chat_managers.get(chat_id_hash)
+    chat = cm.chat
+    user = chat.users.get(hm.decode(request.cookies.get('userId')))
+    if isinstance(user, str):
+        return make_response({'error': user})
+    else:
+        return make_response({'accepted': {'key': im.generate_invite(chat)}})
+
+
 # *** HTML *** ---------------------------------------
 @app.route('/')
 def landing():
@@ -141,17 +158,17 @@ def chat_page(chat_id_hash):
     user_id = request.args.get('u') if request.args.get('u') else request.cookies.get('userId')
     user = chat.users.get(hm.decode(user_id)) if user_id else None
 
-    # TODO Implement
     # Handle Invites.
     invite_key = request.args.get('i')
-    if invite_key:
-        print('Invite key: ' + invite_key)
+    valid_invite = im.validate_invite(chat, invite_key) if invite_key else False
 
     if isinstance(user, User):
         return render_template('chat.html', title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
-    else:
+    elif valid_invite or not chat.invite_only:
         # TODO Only do if invite is valid
         return render_template('join.html', title=chat.display_name)
+    else:
+        return render_template('index.html')
 
 
 if __name__ == '__main__':

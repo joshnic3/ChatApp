@@ -75,6 +75,11 @@ function leaveResponse(data) {
     window.location.reload();
 }
 
+function generateInviteResponse(data) {
+    console.log(data);
+    document.getElementById("inviteLink").value = currentURL+'?i='+data.accepted.key;
+}
+
 
 // API calls.
 function getMessages() {
@@ -84,6 +89,10 @@ function getMessages() {
 function leave() {
     socket.emit(leave_event, {chat_id: getChatIdFromURL()});
     apiPost('leave', {chat_id: getChatIdFromURL()}, leaveResponse);
+}
+
+function generateInvite() {
+    apiPost('invite', {chat_id: getChatIdFromURL()}, generateInviteResponse);
 }
 
 
@@ -104,6 +113,5 @@ window.onload = function(){
     getMessages();
     document.getElementById("contentInput").focus();
     document.getElementById("returnLink").value = currentURL+'?u='+getCookie('userId');
-    document.getElementById("inviteLink").value = currentURL+'?i=NotImplementedYet';
     socket.emit(join_event, {chat_id: getChatIdFromURL()});
 };

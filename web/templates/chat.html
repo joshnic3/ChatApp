@@ -61,8 +61,9 @@
             <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
             <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
             <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="inviteLink" readonly onclick="copyToClipboard('inviteLink')">
-              <label for="inviteLink">invite link</label>
+                <input type="text" class="form-control" id="inviteLink" readonly onclick="copyToClipboard('inviteLink')">
+                <label for="inviteLink">invite link</label>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="generateInvite()">generate invite</button>
             </div>
           </div>
         </div>

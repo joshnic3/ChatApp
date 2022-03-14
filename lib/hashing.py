@@ -13,17 +13,17 @@ class HashManager:
         self._dao = dao
         self._cache = {}
         self._methods = {
-            SHAKE256_3: HashManager._shake256_3,
-            SHA256: HashManager._sha256,
+            SHAKE256_3: HashManager.shake256_3,
+            SHA256: HashManager.sha256,
         }
 
     @staticmethod
-    def _shake256_3(id_int):
-        return shake_256(str(id_int).encode()).hexdigest(3)
+    def shake256_3(to_hash):
+        return shake_256(str(to_hash).encode()).hexdigest(3)
 
     @staticmethod
-    def _sha256(id_int):
-        return sha256(str(id_int).encode()).hexdigest()
+    def sha256(to_hash):
+        return sha256(str(to_hash).encode()).hexdigest()
 
     def decode(self, hash_str):
         result = self._cache.get(hash_str)
