@@ -165,7 +165,6 @@ def chat_page(chat_id_hash):
     if isinstance(user, User):
         return render_template('chat.html', title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
     elif valid_invite or not chat.invite_only:
-        # TODO Only do if invite is valid
         return render_template('join.html', title=chat.display_name)
     else:
         return render_template('index.html')

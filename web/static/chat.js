@@ -76,8 +76,11 @@ function leaveResponse(data) {
 }
 
 function generateInviteResponse(data) {
-    console.log(data);
-    document.getElementById("inviteLink").value = currentURL+'?i='+data.accepted.key;
+    inviteLink = document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
+    inviteLink = document.getElementById("inviteLink");
+    inviteLink.value = 'http://'+currentURL+'?i='+data.accepted.key;
+    inviteLink.disabled = false;
+    copyToClipboard("inviteLink");
 }
 
 
@@ -112,6 +115,6 @@ document.getElementById("contentInput").addEventListener("keyup", function(event
 window.onload = function(){
     getMessages();
     document.getElementById("contentInput").focus();
-    document.getElementById("returnLink").value = currentURL+'?u='+getCookie('userId');
+    document.getElementById("returnLink").value = 'http://'+currentURL+'?u='+getCookie('userId');
     socket.emit(join_event, {chat_id: getChatIdFromURL()});
 };

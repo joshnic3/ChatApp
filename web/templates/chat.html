@@ -58,13 +58,14 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body pt-0 pb-0">
-            <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
-            <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="inviteLink" readonly onclick="copyToClipboard('inviteLink')">
-                <label for="inviteLink">invite link</label>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="generateInvite()">generate invite</button>
-            </div>
+                <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
+                <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="inviteLink" onclick="copyToClipboard('inviteLink')" readonly disabled>
+                    <label for="inviteLink">invite link</label>
+                </div>
+                <button id="generateInviteButton" type="button" class="btn btn-sm btn-outline-primary w-50 mb-3" onclick="generateInvite()">generate invite</button>
+
           </div>
         </div>
       </div>
