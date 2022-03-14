@@ -10,10 +10,11 @@ from flask_socketio import SocketIO, join_room, leave_room
 
 from lib.chat import User, ChatManager, new_chat_manager
 from lib.database import DAO
-from lib.utils import HashManager
+from lib.utils import HashManager, SHAKE256_3, SHA256
 
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
-
+CHAT_ID_HASH = SHAKE256_3
+USER_ID_HASH = SHA256
 
 template_dir = os.path.abspath('../web/templates')
 static_dir = os.path.abspath('../web/static')
@@ -59,7 +60,7 @@ def receive_message(data):
 
 def broadcast_message(chat, user, content):
     from_id = user.id if isinstance(user, User) else None
-    hashed_id = hm.encode(chat.id)
+    hashed_id = hm.encode(chat.id, hash_method=CHAT_ID_HASH)
     cm = chat_managers.get(hashed_id)
     message = cm.new_message(from_id, content)
     socket_io.emit('broadcast_message', _message_as_dict(message, chat), to=hashed_id)
@@ -70,7 +71,7 @@ def broadcast_message(chat, user, content):
 def new_chat():
     data = request.get_json()
     cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')))
-    hashed_id = hm.encode(cm.chat_id)
+    hashed_id = hm.encode(cm.chat_id, hash_method=CHAT_ID_HASH)
     chat_managers[hashed_id] = cm
     return make_response({'accepted': {'chat_id': hashed_id}})
 
