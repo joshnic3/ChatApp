@@ -2,7 +2,7 @@ from hashlib import shake_256
 
 
 # Hashes are never deleted so table will balloon.
-class HashMap:
+class HashManager:
 
     HASH_LENGTH = 3
 
