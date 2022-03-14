@@ -13,6 +13,7 @@ function sendMessage() {
     var userId = getCookie('userId');
     if (userId != undefined && content !== '') {
         let chatId = getChatIdFromURL();
+        // TODO Probs should only send to room?
         socket.emit(send_event, {chat_id: chatId, userId: userId, content: content});
         contentDiv.value = '';
         contentDiv.focus();
