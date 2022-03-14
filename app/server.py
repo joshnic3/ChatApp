@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, make_response
 from flask_socketio import SocketIO
 from lib.chat import User, ChatManager, new_chat_manager
-from lib.utils import HashMap
+from lib.utils import HashManager
 from lib.database import DAO
 from hashlib import shake_256
 import os
@@ -18,7 +18,7 @@ app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socket_io = SocketIO(app)
 
 dao = DAO(DB_PATH)
-hash_map = HashMap(dao)
+hm = HashManager(dao)
 
 chat_managers = {}
 
@@ -38,14 +38,14 @@ def _message_as_dict(message, chat):
 # *** Sockets *** ---------------------------------------
 def broadcast_message(chat, user, content):
     from_id = user.id if isinstance(user, User) else None
-    cm = chat_managers.get(chat.id)
+    cm = chat_managers.get(hm.encode(chat.id))
     message = cm.new_message(from_id, content)
     socket_io.emit('broadcast_message', _message_as_dict(message, chat))
 
 
 @socket_io.on('message_send')
 def receive_message(data):
-    cm = chat_managers.get(int(data.get('chat_id')))
+    cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(int(data.get('userId')))
     if isinstance(user, User):
@@ -57,29 +57,29 @@ def receive_message(data):
 def new_chat():
     data = request.get_json()
     cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')))
-    chat_managers[cm.chat_id] = cm
-    return make_response({'accepted': {'chat_id': cm.chat_id}})
+    hashed_id = hm.encode(cm.chat_id)
+    chat_managers[hashed_id] = cm
+    return make_response({'accepted': {'chat_id': hashed_id}})
 
 
 @app.route('/api/new_user', methods=['POST'])
 def new_user():
     data = request.get_json()
-    cm = chat_managers.get(int(data.get('chat_id')))
-    chat = cm.chat
+    cm = chat_managers.get(data.get('chat_id'))
     user = cm.new_user(data.get('display_name'))
+    chat = cm.chat
     broadcast_message(chat, None, f'{user.display_name} has joined the chat')
-    response = make_response({'accepted': {'chat_id': chat.id, 'user_id': user.id, 'display_name': user.display_name}})
+    response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': user.id, 'display_name': user.display_name}})
     return response
 
 
 @app.route('/api/get_messages', methods=['POST'])
 def get_messages():
     # Client knows user_id, so use cookie.
-    user_id = int(request.cookies.get('userId'))
     data = request.get_json()
-    cm = chat_managers.get(int(data.get('chat_id')))
+    cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-    user = chat.users.get(user_id)
+    user = chat.users.get(int(request.cookies.get('userId')))
     if user is None:
         return make_response({'error': user})
     else:
@@ -90,11 +90,10 @@ def get_messages():
 @app.route('/api/leave', methods=['POST'])
 def leave():
     # Client knows user_id, so use cookie.
-    user_id = request.cookies.get('userId')
     data = request.get_json()
-    cm = chat_managers.get(int(data.get('chat_id')))
+    cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-    user = chat.users.get(int(user_id))
+    user = chat.users.get(int(request.cookies.get('userId')))
     if isinstance(user, str):
         return make_response({'error': user})
     else:
@@ -107,26 +106,28 @@ def leave():
 @app.route('/')
 def landing():
     return render_template('index.html')
-    # return render_template('example_child.html')
 
 
-@app.route('/<chat_id>')
-def chat_page(chat_id):
-    # TODO hash ids, probs not the best way of doing it.
-    chat_id = int(chat_id)
-    cm = ChatManager(dao, chat_id)
-    chat_managers[chat_id] = cm
-    chat = cm.chat
-    # TODO redicrect to home if invalid chat
-    if chat is None:
+@app.route('/<chat_id_hash>')
+def chat_page(chat_id_hash):
+    # Load chat and redirect if it doesn't exist.
+    chat_id = hm.decode(chat_id_hash)
+    if chat_id is None:
+        # Chat id hash is not in map.
         return render_template('index.html')
+
+    if chat_id_hash not in chat_managers:
+        # Chat manager is not in cache so create one.
+        chat_managers[chat_id_hash] = ChatManager(dao, chat_id)
+
+    chat = chat_managers.get(chat_id_hash).chat
 
     # Handle returning user.
     user_id = request.args.get('u') if request.args.get('u') else request.cookies.get('userId')
     user = chat.users.get(int(user_id)) if user_id else None
-    # print(user.display_name)
-    # Handle Invites.
+
     # TODO Implement
+    # Handle Invites.
     invite_key = request.args.get('i')
     if invite_key:
         print('Invite key: ' + invite_key)
