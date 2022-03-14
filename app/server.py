@@ -1,10 +1,16 @@
-from flask import Flask, render_template, request, make_response
-from flask_socketio import SocketIO
-from lib.chat import User, ChatManager, new_chat_manager
-from lib.utils import HashManager
-from lib.database import DAO
-from hashlib import shake_256
+# Note that the Flask server is designed for development only.
+# It is not a production-ready server.
+# Don't rely on it to run your site on the wider web.
+# Use a proper WSGI server (like gunicorn or uWSGI) instead.
+
 import os
+
+from flask import Flask, render_template, request, make_response
+from flask_socketio import SocketIO, join_room, leave_room
+
+from lib.chat import User, ChatManager, new_chat_manager
+from lib.database import DAO
+from lib.utils import HashManager
 
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 
@@ -23,10 +29,6 @@ hm = HashManager(dao)
 chat_managers = {}
 
 
-def encode_id(int_id):
-    return shake_256(str(int_id).encode()).hexdigest(5)
-
-
 def _message_as_dict(message, chat):
     message_dict = message.as_dict()
     sent_by_user = chat.users.get(message.sent_by)
@@ -36,11 +38,18 @@ def _message_as_dict(message, chat):
 
 
 # *** Sockets *** ---------------------------------------
-def broadcast_message(chat, user, content):
-    from_id = user.id if isinstance(user, User) else None
-    cm = chat_managers.get(hm.encode(chat.id))
-    message = cm.new_message(from_id, content)
-    socket_io.emit('broadcast_message', _message_as_dict(message, chat))
+# TODO Implement
+# use to= param in emit?
+@socket_io.on('join_room')
+def on_join(data):
+    # join_room(data.get('chat_id'))
+    print('join_room: ' + data.get('chat_id'))
+
+
+@socket_io.on('leave_room')
+def on_leave(data):
+    # leave_room(data.get('chat_id'))
+    print('leave_room: ' + data.get('chat_id'))
 
 
 @socket_io.on('message_send')
@@ -50,6 +59,13 @@ def receive_message(data):
     user = chat.users.get(int(data.get('userId')))
     if isinstance(user, User):
         broadcast_message(chat, user, data.get('content'))
+
+
+def broadcast_message(chat, user, content):
+    from_id = user.id if isinstance(user, User) else None
+    cm = chat_managers.get(hm.encode(chat.id))
+    message = cm.new_message(from_id, content)
+    socket_io.emit('broadcast_message', _message_as_dict(message, chat))
 
 
 # *** API *** ---------------------------------------
