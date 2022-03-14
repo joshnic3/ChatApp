@@ -1,6 +1,7 @@
 const send_event = 'message_send';
-const connected_event = 'new_connection';
 const receive_event = 'broadcast_message';
+const join_event = 'join_room';
+const leave_event = 'leave_room';
 
 var currentURL = document.domain + ':' + location.port + window.location.pathname;
 var socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -80,6 +81,7 @@ function getMessages() {
 }
 
 function leave() {
+    socket.emit(leave_event, {chat_id: getChatIdFromURL()});
     apiPost('leave', {chat_id: getChatIdFromURL()}, leaveResponse);
 }
 
@@ -102,4 +104,5 @@ window.onload = function(){
     document.getElementById("contentInput").focus();
     document.getElementById("returnLink").value = currentURL+'?u='+getCookie('userId');
     document.getElementById("inviteLink").value = currentURL+'?i=NotImplementedYet';
+    socket.emit(join_event, {chat_id: getChatIdFromURL()});
 };

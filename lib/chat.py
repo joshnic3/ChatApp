@@ -1,8 +1,5 @@
-from uuid import uuid4
-from datetime import datetime
 import random
-import string
-from lib.database import DAO
+from datetime import datetime
 
 
 def new_chat_manager(dao, display_name, max_users=10):
@@ -140,7 +137,3 @@ class Chat:
             'created': self.created.strftime('%d/%m/%Y %H:%M'),
             'user_count': len(self.users)
         }
-
-
-
-
