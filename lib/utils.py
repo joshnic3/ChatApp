@@ -23,7 +23,7 @@ class HashManager:
 
     @staticmethod
     def _sha256(id_int):
-        return sha256(str(id_int)).hexdigest()
+        return sha256(str(id_int).encode()).hexdigest()
 
     def decode(self, hash_str):
         result = self._cache.get(hash_str)

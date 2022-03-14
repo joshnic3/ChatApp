@@ -53,7 +53,8 @@ def on_leave(data):
 def receive_message(data):
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-    user = chat.users.get(int(data.get('userId')))
+
+    user = chat.users.get(hm.decode(data.get('userId')))
     if isinstance(user, User):
         broadcast_message(chat, user, data.get('content'))
 
@@ -83,7 +84,7 @@ def new_user():
     user = cm.new_user(data.get('display_name'))
     chat = cm.chat
     broadcast_message(chat, None, f'{user.display_name} has joined the chat')
-    response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': user.id, 'display_name': user.display_name}})
+    response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': hm.encode(user.id, USER_ID_HASH), 'display_name': user.display_name}})
     return response
 
 
@@ -93,7 +94,7 @@ def get_messages():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-    user = chat.users.get(int(request.cookies.get('userId')))
+    user = chat.users.get(hm.decode(request.cookies.get('userId')))
     if user is None:
         return make_response({'error': user})
     else:
@@ -107,7 +108,7 @@ def leave():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-    user = chat.users.get(int(request.cookies.get('userId')))
+    user = chat.users.get(hm.decode(request.cookies.get('userId')))
     if isinstance(user, str):
         return make_response({'error': user})
     else:
@@ -138,7 +139,7 @@ def chat_page(chat_id_hash):
 
     # Handle returning user.
     user_id = request.args.get('u') if request.args.get('u') else request.cookies.get('userId')
-    user = chat.users.get(int(user_id)) if user_id else None
+    user = chat.users.get(hm.decode(user_id)) if user_id else None
 
     # TODO Implement
     # Handle Invites.
