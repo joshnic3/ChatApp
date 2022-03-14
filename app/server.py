@@ -38,18 +38,14 @@ def _message_as_dict(message, chat):
 
 
 # *** Sockets *** ---------------------------------------
-# TODO Implement
-# use to= param in emit?
 @socket_io.on('join_room')
 def on_join(data):
-    # join_room(data.get('chat_id'))
-    print('join_room: ' + data.get('chat_id'))
+    join_room(data.get('chat_id'))
 
 
 @socket_io.on('leave_room')
 def on_leave(data):
-    # leave_room(data.get('chat_id'))
-    print('leave_room: ' + data.get('chat_id'))
+    leave_room(data.get('chat_id'))
 
 
 @socket_io.on('message_send')
@@ -63,9 +59,10 @@ def receive_message(data):
 
 def broadcast_message(chat, user, content):
     from_id = user.id if isinstance(user, User) else None
-    cm = chat_managers.get(hm.encode(chat.id))
+    hashed_id = hm.encode(chat.id)
+    cm = chat_managers.get(hashed_id)
     message = cm.new_message(from_id, content)
-    socket_io.emit('broadcast_message', _message_as_dict(message, chat))
+    socket_io.emit('broadcast_message', _message_as_dict(message, chat), to=hashed_id)
 
 
 # *** API *** ---------------------------------------
