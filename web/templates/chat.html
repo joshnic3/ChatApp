@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block nav_title %}
+    <div class="nav-item dropdown navbar-brand d-flex p-0 m-0">
+        <a href="/" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">192.168.8.191:9000</a>
+        /
+        <a href="" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#chatModal" >{{ title }}</a>
+        /
+        <a href="" class="link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</a>
+    </div>
+{% endblock %}
+
+
+{% block content %}
+    <ul id="messageBoard" class="list-group list-group-flush" style="max-height:100vh; overflow-y:scroll">
+        <li class="list-group-item">
+            <br><br><br><br>
+            <div class="text-center p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
+        </li>
+    </ul>
+    <div class="form-floating mb-3">
+        <input id="contentInput" type="text" class="form-control" placeholder="type a message" enterkeyhint="send" onsubmit="sendMessage()">
+        <label for="contentInput">type a message</label>
+    </div>
+{% endblock %}
+
+{% block modals %}
+    <div class="modal fade" id="userModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-{{ user.colour }}">{{ user.display_name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0 pb-0">
+            <div class="p-2 fs-6"><strong>joined</strong>: {{ user.joined }}</div>
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="returnLink" readonly onclick="copyToClipboard('returnLink')">
+              <label for="returnLink">return permalink</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="chatModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">{{ title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0 pb-0">
+            <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
+            <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control" id="inviteLink" readonly onclick="copyToClipboard('inviteLink')">
+              <label for="inviteLink">invite link</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="leaveChatModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">are you sure?</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body pt-0 pb-0">
+            <p class="p-2">
+                leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete your user details and messages.
+                <br><br>
+                are you sure?
+            </p>
+          </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="leave()">yes</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="/static/chat.js" charset="utf-8"></script>
+{% endblock %}
+
+{% block root_container_class %}
+    fixed-bottom
+{% endblock %}
