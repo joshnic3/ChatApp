@@ -9,8 +9,8 @@ import os
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 
 
-template_dir = os.path.abspath('./web/templates')
-static_dir = os.path.abspath('./web/static')
+template_dir = os.path.abspath('../web/templates')
+static_dir = os.path.abspath('../web/static')
 
 
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
