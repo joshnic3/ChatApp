@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-
+import bleach
 
 def new_chat_manager(dao, display_name, max_users=10):
     created = datetime.now()
@@ -85,10 +85,11 @@ class Message:
         self.content = None
 
     def as_dict(self):
+        # This goes straight out to the client so sanitize anything that is input but the user.
         return {
             'sent_at': self.send_at.strftime('%d/%m/%Y %H:%M'),
             'sent_by': self.sent_by,
-            'content': self.content
+            'content': bleach.clean(self.content)
         }
 
 
@@ -107,8 +108,9 @@ class User:
         self.colour = None
 
     def as_dict(self):
+        # This goes straight out to the client so sanitize anything that is input but the user.
         return {
-            'display_name': self.display_name,
+            'display_name': bleach.clean(self.display_name),
             'joined': self.joined.strftime('%d/%m/%Y %H:%M'),
             'colour': self.colour,
         }
@@ -131,8 +133,9 @@ class Chat:
         self.messages = []
 
     def as_dict(self):
+        # This goes straight out to the client so sanitize anything that is input but the user.
         return {
-            'display_name': self.display_name,
+            'display_name': bleach.clean(self.display_name),
             'max_users': self.max_users,
             'created': self.created.strftime('%d/%m/%Y %H:%M'),
             'user_count': len(self.users)
