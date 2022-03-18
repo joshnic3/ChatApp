@@ -15,6 +15,8 @@ from lib.hashing import HashManager, SHAKE256_3, SHA256
 
 import urllib.parse
 
+
+SITE_TITLE = 'chat'
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
@@ -137,7 +139,7 @@ def generate_invite():
 # *** HTML *** ---------------------------------------
 @app.route('/')
 def landing():
-    return render_template('index.html')
+    return render_template('index.html', site_title=SITE_TITLE,)
 
 
 @app.route('/<chat_id_hash>')
@@ -146,7 +148,7 @@ def chat_page(chat_id_hash):
     chat_id = hm.decode(chat_id_hash)
     if chat_id is None:
         # Chat id hash is not in map.
-        return render_template('index.html')
+        return render_template('index.html', site_title=SITE_TITLE,)
 
     if chat_id_hash not in chat_managers:
         # Chat manager is not in cache so create one.
@@ -163,11 +165,11 @@ def chat_page(chat_id_hash):
     valid_invite = im.validate_invite(chat, invite_key) if invite_key else False
 
     if isinstance(user, User):
-        return render_template('chat.html', title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
+        return render_template('chat.html', site_title=SITE_TITLE, title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
     elif valid_invite or not chat.invite_only:
-        return render_template('join.html', title=chat.display_name)
+        return render_template('join.html', site_title=SITE_TITLE, title=chat.display_name)
     else:
-        return render_template('index.html')
+        return render_template('index.html', site_title=SITE_TITLE)
 
 
 if __name__ == '__main__':

@@ -53,8 +53,8 @@ class ChatManager:
     def new_user(self, display_name):
         joined = datetime.now()
         colour = self._next_colour()
-        display_name = display_name.lower()
-        user_id = self.dao.insert('users', [self.chat_id, display_name, joined.strftime(self.DT_FORMAT), colour])[0]
+        user_id = self.dao.insert('users',
+                                  [self.chat_id, display_name.lower(), joined.strftime(self.DT_FORMAT), colour])[0]
         user = User.from_list([user_id, display_name, joined, colour])
         self.chat.users[user_id] = user
         return user
@@ -67,7 +67,7 @@ class ChatManager:
     def new_message(self, user_id, content):
         sent_at = datetime.now()
         message_id = self.dao.insert('messages', [self.chat_id, user_id, sent_at.strftime(self.DT_FORMAT), content])
-        message = Message.from_list([message_id, user_id, sent_at, content])
+        message = Message.from_list([message_id, user_id, sent_at, content.lower()])
         self.chat.messages.append(message)
         return message
 
