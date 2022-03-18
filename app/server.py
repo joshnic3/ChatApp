@@ -95,6 +95,16 @@ def new_user():
     return response
 
 
+@app.route('/api/change_user_colour', methods=['POST'])
+def change_user_colour():
+    data = request.get_json()
+    cm = chat_managers.get(data.get('chat_id'))
+    cm.change_user_colour(hm.decode(request.cookies.get('userId')), data.get('colour'))
+    response = make_response({'accepted': {'colour': data.get('colour')}})
+    return response
+
+
+
 @app.route('/api/get_messages', methods=['POST'])
 def get_messages():
     # Client knows user_id, so use cookie.

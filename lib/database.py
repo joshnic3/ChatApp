@@ -13,6 +13,10 @@ def _where_sql(keys):
     return f' WHERE {" AND ".join([f"{k} = ?" for k in keys])}'
 
 
+def _set_sql(keys):
+    return f' SET {", ".join([f"{k} = ?" for k in keys])}'
+
+
 class DAO:
 
     def __init__(self, file_path):
@@ -39,6 +43,12 @@ class DAO:
             f'SELECT * FROM {table}{_where_sql(condition.keys())};',
             list(condition.values()),
             return_one
+        )
+
+    def update(self, table, values, condition):
+        return self.execute(
+            f'UPDATE {table} {_set_sql(values.keys())}{_where_sql(condition.keys())};',
+            list(values.values()) + list(condition.values())
         )
 
     def delete(self, table, condition):

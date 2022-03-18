@@ -19,11 +19,10 @@ class ChatManager:
         self.dao = dao
         self.chat = self._load_chat()
         self.colours = [
-            'primary',
-            'success',
-            'danger',
-            'warning',
-            'info'
+            '#000000',
+            '#ff0000',
+            '#00ff00',
+            '#0000ff'
         ]
         random.shuffle(self.colours)
 
@@ -63,6 +62,10 @@ class ChatManager:
         # TODO ON DELETE CASCADE
         self.dao.delete('users', {'id': user_id})
         self.chat.users.pop(user_id)
+
+    def change_user_colour(self, user_id, colour):
+        self.dao.update('users', {'colour': colour}, {'id': user_id})
+        self.chat.users[user_id].colour = colour
 
     def new_message(self, user_id, content):
         sent_at = datetime.now()

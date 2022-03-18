@@ -33,7 +33,7 @@ function displayNameHTML(user) {
     }
     let fromText = document.createElement("strong")
     fromText.innerHTML = displayName;
-    fromText.classList.add("text-" + colour);
+    fromText.style.color = colour;
     return fromText
 }
 
@@ -58,6 +58,15 @@ function copyToClipboard(elementId) {
     copyText.select();
     copyText.setSelectionRange(0, 99999);
     console.log(copyText.value);
+}
+
+function colourUpdate() {
+    var colorPicker = document.getElementById("colorPicker");
+    var saveColourButton = document.getElementById("saveColourButton");
+    saveColourButton.innerHTML = 'apply ' + colorPicker.value;
+//    saveColourButton.style.borderColor=colorPicker.value;
+//    saveColourButton.style.backgroundColor=colorPicker.value;
+    saveColourButton.disabled=false
 }
 
 
@@ -90,6 +99,13 @@ function generateInviteResponse(data) {
 
 
 // API calls.
+function saveColour() {
+    var colorPicker = document.getElementById("colorPicker");
+    apiPost('change_user_colour', {'chat_id': getChatIdFromURL(), 'colour': colorPicker.value}, console.log);
+    location.reload();
+}
+
+
 function getMessages() {
     apiPost('get_messages', {chat_id: getChatIdFromURL(), limit: 100}, displayMessages);
 }

@@ -19,7 +19,7 @@
           <div class="navbar-brand mx-auto p-0 fw-bold">site title</div>
         {% endif %}
         {% if user %}
-          <button type="button" class="btn btn-link link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none fw-bold"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</button>
+          <button type="button" class="btn btn-link p-1 pt-0 pb-0 m-0 text-decoration-none fw-bold"  data-bs-toggle="modal" data-bs-target="#userModal" style="color:{{ user.colour }}">{{ user.display_name }}</button>
         {%endif %}
       </div>
     </nav>
