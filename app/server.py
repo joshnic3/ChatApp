@@ -17,6 +17,7 @@ import urllib.parse
 
 
 SITE_TITLE = 'chat'
+SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
@@ -87,7 +88,7 @@ def new_chat():
 def new_user():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
-    user = cm.new_user(data.get('display_name'))
+    user = cm.new_user(data.get('display_name').lower())
     chat = cm.chat
     broadcast_message(chat, None, f'{user.display_name} has joined the chat')
     response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': hm.encode(user.id, USER_ID_HASH), 'display_name': user.display_name}})
@@ -139,7 +140,7 @@ def generate_invite():
 # *** HTML *** ---------------------------------------
 @app.route('/')
 def landing():
-    return render_template('index.html', site_title=SITE_TITLE,)
+    return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, user=None)
 
 
 @app.route('/<chat_id_hash>')
@@ -148,7 +149,7 @@ def chat_page(chat_id_hash):
     chat_id = hm.decode(chat_id_hash)
     if chat_id is None:
         # Chat id hash is not in map.
-        return render_template('index.html', site_title=SITE_TITLE,)
+        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, user=None)
 
     if chat_id_hash not in chat_managers:
         # Chat manager is not in cache so create one.
@@ -165,11 +166,11 @@ def chat_page(chat_id_hash):
     valid_invite = im.validate_invite(chat, invite_key) if invite_key else False
 
     if isinstance(user, User):
-        return render_template('chat.html', site_title=SITE_TITLE, title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
+        return render_template('chat.html', site_title=SITE_TITLE, site_font=SITE_FONT, title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
     elif valid_invite or not chat.invite_only:
-        return render_template('join.html', site_title=SITE_TITLE, title=chat.display_name)
+        return render_template('join.html', site_title=SITE_TITLE, site_font=SITE_FONT, title=chat.display_name, user=None)
     else:
-        return render_template('index.html', site_title=SITE_TITLE)
+        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, user=None)
 
 
 if __name__ == '__main__':

@@ -4,14 +4,6 @@
     join {{ title }}
 {% endblock %}
 
-{% block nav_title %}
-    <div class="nav-item navbar-brand d-flex p-0 m-0">
-       <a href="/" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">{{ site_title }}</a>
-        /
-        <a href="" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">{{ title }}</a>
-    </div>
-{% endblock %}
-
 {% block content %}
     <div class="form-floating m-3">
       <input id="displayNameInput" type="text" class="form-control" placeholder="enter a display name" enterkeyhint="done" onsubmit="joinButtonSubmit()">

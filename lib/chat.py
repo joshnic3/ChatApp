@@ -138,9 +138,13 @@ class Chat:
 
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
+
         return {
+            'details': {
+                'created': self.created.strftime('%d/%m/%Y %H:%M'),
+                'user count': len(self.users),
+                'max users': self.max_users
+
+            },
             'display_name': bleach.clean(self.display_name),
-            'max_users': self.max_users,
-            'created': self.created.strftime('%d/%m/%Y %H:%M'),
-            'user_count': len(self.users)
         }

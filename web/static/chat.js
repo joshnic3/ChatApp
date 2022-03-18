@@ -76,11 +76,16 @@ function leaveResponse(data) {
 }
 
 function generateInviteResponse(data) {
-    inviteLink = document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
+    document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
     inviteLink = document.getElementById("inviteLink");
+    inviteLink.focus();
     inviteLink.value = 'http://'+currentURL+'?i='+data.accepted.key;
     inviteLink.disabled = false;
+
     copyToClipboard("inviteLink");
+
+    inviteLinkForm = document.getElementById("inviteLinkForm");
+    inviteLinkForm.classList.remove('d-none')
 }
 
 

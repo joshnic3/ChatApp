@@ -4,22 +4,12 @@
     {{ title }}
 {% endblock %}
 
-{% block nav_title %}
-    <div class="nav-item dropdown navbar-brand d-flex p-0 m-0">
-        <a href="/" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">{{ site_title }}</a>
-        /
-        <a href="" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#chatModal" >{{ title }}</a>
-        /
-        <a href="" class="link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</a>
-    </div>
-{% endblock %}
-
 
 {% block content %}
     <ul id="messageBoard" class="list-group list-group-flush" style="max-height:100vh; overflow-y:scroll">
         <li class="list-group-item">
             <br><br><br><br>
-            <div class="text-center p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
+            <div class="text-center p-2 fs-6"><strong>created</strong>: {{ chat.details.created }}</div>
         </li>
     </ul>
     <div class="form-floating mb-3">
@@ -53,19 +43,33 @@
     <div class="modal fade" id="chatModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ title }}</h5>
+          <div class="modal-header pt-2 pb-2">
+            <h3 class="modal-title fw-bold">{{ title }}</h3>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-                <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
-                <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="inviteLink" onclick="copyToClipboard('inviteLink')" readonly disabled>
-                    <label for="inviteLink">invite link</label>
-                </div>
-                <button id="generateInviteButton" type="button" class="btn btn-sm btn-outline-primary w-50 mb-3" onclick="generateInvite()">generate invite</button>
+          <div class="modal-body p-0">
+            <div class="container p-3">
+                <h5 class="fw-bold">stats</h5>
+                <ul class="ps-3" style="margin-bottom:0;">
+                  {% for key, value in chat.details.items() %}
+                    <li><strong>{{ key }}</strong>: {{ value }}</a></li>
+                  {% endfor %}
+                </ul>
+            </div>
 
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">invite others</h5>
+                <div id="inviteGenerator">
+                    <p>you can invite others to the chat by sending them a unique invite link.</p>
+                    <button id="generateInviteButton" type="button" class="btn btn-sm btn-outline-primary w-50 mb-1" onclick="generateInvite()">generate invite</button>
+                    <div id="inviteLinkForm" class="form-floating mb-3 d-none">
+                        <input type="text" class="form-control" id="inviteLink" onclick="copyToClipboard('inviteLink')" readonly disabled>
+                        <label for="inviteLink">invite link</label>
+                    </div>
+                </div>
+            </div>
           </div>
         </div>
       </div>

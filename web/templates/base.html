@@ -4,14 +4,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="static/img/favicon.ico" sizes="32x32">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-<!--    <link href='http://fonts.googleapis.com/css?family=Oxygen Mono:400,300,700' rel='stylesheet' type='text/css'>-->
+    <link href='http://fonts.googleapis.com/css?family={{ site_font.brand }}:400,300,700' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family={{ site_font.body }}:400,300,700' rel='stylesheet' type='text/css'>
     <title>{% block title %}{% endblock %}</title>
-
   </head>
   <body>
-    <nav class="navbar navbar-fixed-top navbar-light bg-white shadow-sm " style="z-index: 1">
-      <div id="scrollableNavBar" class="container-fluid d-flex justify-content-left overflow-scroll">
-          {% block nav_title %}{% endblock %}
+    <nav class="navbar navbar-sticky-top navbar-expand-md navbar-light bg-white shadow mb-5 bg-body rounded p-0" style="z-index: 1">
+      <div class="container-fluid ">
+        <!--    Hacky fix to align the nav bar items    -->
+        <div class="invisible p-2">{{ user.display_name }}</div>
+        <a class="navbar-brand mx-auto p-0 fw-bold" data-bs-toggle="modal" data-bs-target="#chatModal">{{ title }}</a>
+        {% if user %}
+          <button type="button" class="btn btn-link link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</button>
+        {%endif %}
+
       </div>
     </nav>
 
@@ -29,9 +35,14 @@
     <script src="/static/web_friendly.js" charset="utf-8"></script>
   </body>
     <style>
-<!--      body {-->
-<!--        font-family: 'Oxygen Mono', sans-serif !important;-->
-<!--      }-->
+      body {
+        font-family: '{{ site_font.body }}', sans-serif !important;
+      }
+      .navbar-brand {
+
+        font-size: 30px;
+      }
+      <!--        font-family: '{{ site_font.brand }}', sans-serif  !important;-->
     </style>
 </html>
 
