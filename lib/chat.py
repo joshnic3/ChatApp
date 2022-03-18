@@ -112,8 +112,10 @@ class User:
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
+            'details': {
+                'joined': self.joined.strftime('%d/%m/%Y %H:%M'),
+            },
             'display_name': bleach.clean(self.display_name),
-            'joined': self.joined.strftime('%d/%m/%Y %H:%M'),
             'colour': self.colour,
         }
 

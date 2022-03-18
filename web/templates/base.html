@@ -13,11 +13,14 @@
       <div class="container-fluid ">
         <!--    Hacky fix to align the nav bar items    -->
         <div class="invisible p-2">{{ user.display_name }}</div>
-        <a class="navbar-brand mx-auto p-0 fw-bold" data-bs-toggle="modal" data-bs-target="#chatModal">{{ title }}</a>
+        {% if chat %}
+          <a class="navbar-brand mx-auto p-0 fw-bold" data-bs-toggle="modal" data-bs-target="#chatModal">{{ chat.display_name }}</a>
+        {% else %}
+          <div class="navbar-brand mx-auto p-0 fw-bold">site title</div>
+        {% endif %}
         {% if user %}
-          <button type="button" class="btn btn-link link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</button>
+          <button type="button" class="btn btn-link link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none fw-bold"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</button>
         {%endif %}
-
       </div>
     </nav>
 

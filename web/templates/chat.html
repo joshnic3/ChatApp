@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ title }}
+    {{ chat.display_name }}
 {% endblock %}
 
 
@@ -23,18 +23,43 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-{{ user.colour }}">{{ user.display_name }}</h5>
+            <h3 class="modal-title text-{{ user.colour }} fw-bold">{{ user.display_name }}</h3>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-            <div class="p-2 fs-6"><strong>joined</strong>: {{ user.joined }}</div>
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="returnLink" readonly onclick="copyToClipboard('returnLink')">
-              <label for="returnLink">return permalink</label>
+          <div class="modal-body p-0">
+            <div class="container p-3">
+                <h5 class="fw-bold">details</h5>
+                <ul class="ps-3" style="margin-bottom:0;">
+                  {% for key, value in chat.details.items() %}
+                    <li><strong>{{ key }}</strong>: {{ value }}</a></li>
+                  {% endfor %}
+                </ul>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">return link</h5>
+                <p>
+                    continue the chat later using your unique return link. no need to make an account.
+                </p>
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="returnLink" readonly onclick="copyToClipboard('returnLink')">
+                    <label for="returnLink">return permalink</label>
+                </div>
+            </div>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">leave chat</h5>
+                <p>
+                    when you leave the chat all of your messages and user data will be deleted.
+                </p>
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -44,12 +69,12 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header pt-2 pb-2">
-            <h3 class="modal-title fw-bold">{{ title }}</h3>
+            <h3 class="modal-title fw-bold">{{ chat.display_name }}</h3>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body p-0">
             <div class="container p-3">
-                <h5 class="fw-bold">stats</h5>
+                <h5 class="fw-bold">details</h5>
                 <ul class="ps-3" style="margin-bottom:0;">
                   {% for key, value in chat.details.items() %}
                     <li><strong>{{ key }}</strong>: {{ value }}</a></li>
