@@ -3,23 +3,18 @@
 # Don't rely on it to run your site on the wider web.
 # Use a proper WSGI server (like gunicorn or uWSGI) instead.
 
+import argparse
 import os
+import sys
 
+import yaml
 from flask import Flask, render_template, request, make_response
 from flask_socketio import SocketIO, join_room, leave_room
 
 from lib.chat import User, Chat, ChatManager, new_chat_manager
 from lib.database import DAO
-from lib.invites import InviteManager
 from lib.hashing import HashManager, SHAKE256_3, SHA256
-
-import urllib.parse
-
-# TODO read from yaml file
-SITE_TITLE = 'local chat'
-MAX_USER_LIMIT = 10
-SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
-DB_PATH = '/Users/joshnicholls/Desktop/chat_data.db'
+from lib.invites import InviteManager
 
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
@@ -30,9 +25,10 @@ app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socket_io = SocketIO(app)
 
-dao = DAO(DB_PATH)
-hm = HashManager(dao)
-im = InviteManager(dao)
+configs = None
+dao = None
+hm = None
+im = None
 
 chat_managers = {}
 
@@ -80,7 +76,7 @@ def broadcast_message(chat, user, content):
 @app.route('/api/new_chat', methods=['POST'])
 def new_chat():
     data = request.get_json()
-    cm = new_chat_manager(dao, data.get('chat_name'), MAX_USER_LIMIT, int(data.get('invite_only')))
+    cm = new_chat_manager(dao, data.get('chat_name'), configs.get('max_user_limit'), int(data.get('invite_only')))
     hashed_id = hm.encode(cm.chat_id, hash_method=CHAT_ID_HASH)
     chat_managers[hashed_id] = cm
     return make_response({'accepted': {'chat_id': hashed_id}})
@@ -161,7 +157,7 @@ def generate_invite():
 # *** HTML *** ---------------------------------------
 @app.route('/')
 def landing():
-    return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
+    return render_template('index.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=None, user=None)
 
 
 @app.route('/<chat_id_hash>')
@@ -170,15 +166,15 @@ def chat_page(chat_id_hash):
     chat_id = hm.decode(chat_id_hash)
     if chat_id is None:
         # Chat id hash is not in map.
-        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
+        return render_template('index.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=None, user=None)
 
     if chat_id_hash not in chat_managers:
         # Chat manager is not in cache so create one.
-        chat_managers[chat_id_hash] = ChatManager(dao, chat_id, MAX_USER_LIMIT)
+        chat_managers[chat_id_hash] = ChatManager(dao, chat_id, configs.get('max_user_limit'))
 
     chat = chat_managers.get(chat_id_hash).chat
     if not isinstance(chat, Chat):
-        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
+        return render_template('index.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=None, user=None)
 
     # Handle returning user.
     user_id = request.args.get('u') if request.args.get('u') else request.cookies.get('userId')
@@ -189,12 +185,35 @@ def chat_page(chat_id_hash):
     valid_invite = im.validate_invite(chat, invite_key) if invite_key else False
 
     if isinstance(user, User):
-        return render_template('chat.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=user.as_dict())
+        return render_template('chat.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=chat.as_dict(), user=user.as_dict())
     elif (valid_invite and chat.invite_only) or not chat.invite_only or not chat.users:
-        return render_template('join.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=None)
+        return render_template('join.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=chat.as_dict(), user=None)
     else:
-        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
+        return render_template('index.html', site_title=configs.get('site_title'), site_font=configs.get('site_font'), chat=None, user=None)
+
+
+def parse_configs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--configs', type=str, required=True)
+    args = parser.parse_args()
+    with open(args.configs, "r") as stream:
+        try:
+            yaml_dict = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return yaml_dict
+
+
+def main():
+    global dao, hm, im, configs
+    configs = parse_configs()
+    dao = DAO(configs.get('database').get('path'))
+    hm = HashManager(dao)
+    im = InviteManager(dao)
+    socket_io.run(app, port=configs.get('port'), host="0.0.0.0", debug=True)
+
+    return 0
 
 
 if __name__ == '__main__':
-    socket_io.run(app, port=9000, host="0.0.0.0", debug=True)
+    sys.exit(main())

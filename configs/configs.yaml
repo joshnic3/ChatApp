@@ -1,6 +1,12 @@
-path: /Users/joshnicholls/Desktop/chat_data.db
+port: 9000
+site_title: local chat
+max_user_limit: 10
+site_font:
+  body: DM Sans
+#  body: Inspiration
 
-sql:
+database:
+  path: /Users/joshnicholls/Desktop/chat_data.db
   chats: 'CREATE TABLE chats (
             id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             display_name varchar(16) NOT NULL,
@@ -32,3 +38,4 @@ sql:
             issued datetime,
             key varchar(255)
           );'
+

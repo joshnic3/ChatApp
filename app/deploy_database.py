@@ -22,9 +22,9 @@ class DatabaseManager:
 
 def parse_configs():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--schema', type=str, required=True)
+    parser.add_argument('-c', '--configs', type=str, required=True)
     args = parser.parse_args()
-    with open(args.schema, "r") as stream:
+    with open(args.configs, "r") as stream:
         try:
             yaml_dict = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -35,9 +35,9 @@ def parse_configs():
 def main():
     configs = parse_configs()
     dbm = DatabaseManager(configs.get('path'))
-    dbm.create_tables(configs.get('sql'))
-    if configs.get('rows'):
-        dbm.insert_rows(configs.get('rows'))
+    dbm.create_tables(configs.get('database').get('path'))
+    # if configs.get('rows'):
+    #     dbm.insert_rows(configs.get('rows'))
     return 0
 
 
