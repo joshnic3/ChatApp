@@ -52,7 +52,8 @@ class ChatManager:
         return chat
 
     def new_user(self, display_name):
-        # TODO Check number of users and max users
+        if len(self.chat.users) + 1 > self.chat.max_users:
+            return None
         joined = datetime.now()
         colour = self._next_colour()
         user_id = self.dao.insert('users',
@@ -66,9 +67,10 @@ class ChatManager:
         self.dao.delete('users', {'id': user_id})
         self.chat.users.pop(user_id)
 
-    def change_user_colour(self, user_id, colour):
-        self.dao.update('users', {'colour': colour}, {'id': user_id})
-        self.chat.users[user_id].colour = colour
+    def change_colour(self, obj, colour):
+        if isinstance(obj, User):
+            self.dao.update('users', {'colour': colour}, {'id': obj.id})
+            self.chat.users[obj.id].colour = colour
 
     def new_message(self, user_id, content):
         sent_at = datetime.now()

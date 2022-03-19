@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-
+# TODO should be done on client side for live updates. but the logic is here.
 def format_datetime(datetime_obj):
     now = datetime.now()
     if datetime_obj > (now - timedelta(minutes=1)):

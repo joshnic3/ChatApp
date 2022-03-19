@@ -2,7 +2,7 @@
 function connectedResponse(data) {
     console.log(data);
     if ("error" in data) {
-        alert(data.error);
+        alert('ERROR: '+data.error);
     } else {
         response = data.accepted;
         document.cookie = "userId=" + response.user_id.toString();

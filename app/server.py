@@ -16,7 +16,7 @@ from lib.hashing import HashManager, SHAKE256_3, SHA256
 import urllib.parse
 
 
-SITE_TITLE = 'chat'
+SITE_TITLE = 'lan chat'
 SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
@@ -43,6 +43,10 @@ def _message_as_dict(message, chat):
     if sent_by_user is not None:
         message_dict['sent_by'] = sent_by_user.as_dict()
     return message_dict
+
+
+def _error_response(error_message):
+    return make_response({'error': error_message})
 
 
 # *** Sockets *** ---------------------------------------
@@ -89,19 +93,30 @@ def new_user():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
     user = cm.new_user(data.get('display_name').lower())
-    chat = cm.chat
-    broadcast_message(chat, None, f'{user.display_name} has joined the chat')
-    response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': hm.encode(user.id, USER_ID_HASH), 'display_name': user.display_name}})
-    return response
+    if isinstance(user, User):
+        chat = cm.chat
+        broadcast_message(chat, None, f'{user.display_name} has joined the chat')
+        return make_response(
+            {
+                'accepted': {
+                    'chat_id': data.get('chat_id'),
+                    'user_id': hm.encode(user.id, USER_ID_HASH),
+                    'display_name': user.display_name}
+            })
+    else:
+        return _error_response('chat has reached its user limit.')
 
 
 @app.route('/api/change_user_colour', methods=['POST'])
 def change_user_colour():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
-    cm.change_user_colour(hm.decode(request.cookies.get('userId')), data.get('colour'))
-    response = make_response({'accepted': {'colour': data.get('colour')}})
-    return response
+    user = cm.chat.users.get(hm.decode(request.cookies.get('userId')))
+    if isinstance(user, User):
+        cm.change_colour(user, data.get('colour'))
+        return make_response({'accepted': {'colour': data.get('colour')}})
+    else:
+        return _error_response(f'invalid user.')
 
 
 @app.route('/api/get_messages', methods=['POST'])
@@ -111,11 +126,10 @@ def get_messages():
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
-    if user is None:
-        return make_response({'error': user})
+    if isinstance(user, User):
+        return make_response({'messages': [_message_as_dict(m, chat) for m in chat.messages]})
     else:
-        messages = [ _message_as_dict(m, chat) for m in chat.messages]
-        return make_response({'messages': messages})
+        return _error_response(f'you are not allowed to view {data.get("chat_id")} messages.')
 
 
 @app.route('/api/leave', methods=['POST'])
@@ -125,12 +139,12 @@ def leave():
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
-    if isinstance(user, str):
-        return make_response({'error': user})
-    else:
+    if isinstance(user, User):
         cm.delete_user(user.id)
         broadcast_message(chat, None, f'{user.display_name} left the chat')
         return make_response({'removed': True})
+    else:
+        return _error_response(f'failed to remove user from {data.get("chat_id")}.')
 
 
 @app.route('/api/invite', methods=['POST'])
@@ -139,10 +153,10 @@ def generate_invite():
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
-    if isinstance(user, str):
-        return make_response({'error': user})
-    else:
+    if isinstance(user, User):
         return make_response({'accepted': {'key': im.generate_invite(chat)}})
+    else:
+        return _error_response(f'you are not allowed to invite users to {data.get("chat_id")}')
 
 
 # *** HTML *** ---------------------------------------
