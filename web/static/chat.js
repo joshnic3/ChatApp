@@ -1,6 +1,7 @@
 const send_event = 'message_send';
-const connected_event = 'new_connection';
 const receive_event = 'broadcast_message';
+const join_event = 'join_room';
+const leave_event = 'leave_room';
 
 var currentURL = document.domain + ':' + location.port + window.location.pathname;
 var socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -12,6 +13,7 @@ function sendMessage() {
     var userId = getCookie('userId');
     if (userId != undefined && content !== '') {
         let chatId = getChatIdFromURL();
+        // TODO Probs should only send to room?
         socket.emit(send_event, {chat_id: chatId, userId: userId, content: content});
         contentDiv.value = '';
         contentDiv.focus();
@@ -31,7 +33,7 @@ function displayNameHTML(user) {
     }
     let fromText = document.createElement("strong")
     fromText.innerHTML = displayName;
-    fromText.classList.add("text-" + colour);
+    fromText.style.color = colour;
     return fromText
 }
 
@@ -40,7 +42,7 @@ function displayMessage(message) {
     messageDiv.classList.add("list-group-item");
     messageDiv.setAttribute("data-bs-toggle", "tooltip");
     messageDiv.setAttribute("data-bs-placement", "top");
-    messageDiv.setAttribute("title", "sent at: " + message.sent_at );
+    messageDiv.setAttribute("title", "sent at: " + message.sent_at);
     messageDiv.appendChild(displayNameHTML(message.sent_by));
     messageDiv.innerHTML += ": " + message.content;
     document.getElementById("messageBoard").appendChild(messageDiv);
@@ -58,6 +60,21 @@ function copyToClipboard(elementId) {
     console.log(copyText.value);
 }
 
+function colourUpdate() {
+    var colorPicker = document.getElementById("colorPicker");
+    var saveColourButton = document.getElementById("saveColourButton");
+    saveColourButton.innerHTML = 'apply ' + colorPicker.value;
+//    saveColourButton.style.borderColor=colorPicker.value;
+//    saveColourButton.style.backgroundColor=colorPicker.value;
+    saveColourButton.disabled=false
+}
+
+function focusOnMessageInput() {
+    if (! /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+        document.getElementById("contentInput").focus();
+    }
+}
+
 
 // Response callback functions.
 function displayMessages(data) {
@@ -73,14 +90,39 @@ function leaveResponse(data) {
     window.location.reload();
 }
 
+function generateInviteResponse(data) {
+    document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
+    inviteLink = document.getElementById("inviteLink");
+    inviteLink.focus();
+    inviteLink.value = 'http://'+currentURL+'?i='+data.accepted.key;
+    inviteLink.disabled = false;
+
+    copyToClipboard("inviteLink");
+
+    inviteLinkForm = document.getElementById("inviteLinkForm");
+    inviteLinkForm.classList.remove('d-none')
+}
+
 
 // API calls.
+function saveColour() {
+    var colorPicker = document.getElementById("colorPicker");
+    apiPost('change_user_colour', {'chat_id': getChatIdFromURL(), 'colour': colorPicker.value}, console.log);
+    location.reload();
+}
+
+
 function getMessages() {
     apiPost('get_messages', {chat_id: getChatIdFromURL(), limit: 100}, displayMessages);
 }
 
 function leave() {
+    socket.emit(leave_event, {chat_id: getChatIdFromURL()});
     apiPost('leave', {chat_id: getChatIdFromURL()}, leaveResponse);
+}
+
+function generateInvite() {
+    apiPost('invite', {chat_id: getChatIdFromURL()}, generateInviteResponse);
 }
 
 
@@ -99,7 +141,7 @@ document.getElementById("contentInput").addEventListener("keyup", function(event
 
 window.onload = function(){
     getMessages();
-    document.getElementById("contentInput").focus();
-    document.getElementById("returnLink").value = currentURL+'?u='+getCookie('userId');
-    document.getElementById("inviteLink").value = currentURL+'?i=NotImplementedYet';
+    focusOnMessageInput();
+    document.getElementById("returnLink").value = 'http://'+currentURL+'?u='+getCookie('userId');
+    socket.emit(join_event, {chat_id: getChatIdFromURL()});
 };

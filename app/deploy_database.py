@@ -1,6 +1,10 @@
-import sys
 import argparse
+import logging
+import logging.config
+import sys
+
 import yaml
+
 from lib.database import DAO
 
 
@@ -11,20 +15,20 @@ class DatabaseManager:
 
     def create_tables(self, sql_dict):
         for table, sql in sql_dict.items():
-            print(f'Creating table {table}...')
             self.dao.execute(sql)
+            logging.info(f'Created table {table}.')
 
     def insert_rows(self, rows_dict):
         for table, rows in rows_dict.items():
-            print(f'Inserting {len(rows)} into table {table}...')
             self.dao.insert_many(table, rows)
+            logging.info(f'Inserted {len(rows)} into table {table}.')
 
 
 def parse_configs():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--schema', type=str, required=True)
+    parser.add_argument('-c', '--configs', type=str, required=True)
     args = parser.parse_args()
-    with open(args.schema, "r") as stream:
+    with open(args.configs, "r") as stream:
         try:
             yaml_dict = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -34,8 +38,11 @@ def parse_configs():
 
 def main():
     configs = parse_configs()
-    dbm = DatabaseManager(configs.get('path'))
-    dbm.create_tables(configs.get('sql'))
+    logging.config.dictConfig(configs.get('log'))
+    dbm = DatabaseManager(configs.get('database').get('path'))
+    dbm.create_tables(configs.get('database').get('tables'))
+    if configs.get('database').get('rows'):
+        dbm.insert_rows(configs.get('database').get('rows'))
     return 0
 
 

@@ -1,17 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-    {{ title }}
-{% endblock %}
-
-{% block nav_title %}
-    <div class="nav-item dropdown navbar-brand d-flex p-0 m-0">
-        <a href="/" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">192.168.8.191:9000</a>
-        /
-        <a href="" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#chatModal" >{{ title }}</a>
-        /
-        <a href="" class="link-{{ user.colour }} p-1 pt-0 pb-0 m-0 text-decoration-none"  data-bs-toggle="modal" data-bs-target="#userModal" >{{ user.display_name }}</a>
-    </div>
+    {{ chat.display_name }}
 {% endblock %}
 
 
@@ -19,7 +9,7 @@
     <ul id="messageBoard" class="list-group list-group-flush" style="max-height:100vh; overflow-y:scroll">
         <li class="list-group-item">
             <br><br><br><br>
-            <div class="text-center p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
+            <div class="text-center p-2 fs-6"><strong>created</strong>: {{ chat.details.created }}</div>
         </li>
     </ul>
     <div class="form-floating mb-3">
@@ -33,18 +23,57 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-{{ user.colour }}">{{ user.display_name }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h3 class="modal-title fw-bold" style="color:{{ user.colour }};">{{ user.display_name }}</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="focusOnMessageInput()"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-            <div class="p-2 fs-6"><strong>joined</strong>: {{ user.joined }}</div>
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="returnLink" readonly onclick="copyToClipboard('returnLink')">
-              <label for="returnLink">return permalink</label>
+          <div class="modal-body p-0">
+            <div class="container p-3">
+                <h5 class="fw-bold">details</h5>
+                <ul class="ps-3" style="margin-bottom:0;">
+                  {% for key, value in user.details.items() %}
+                    <li><strong>{{ key }}</strong>: {{ value }}</a></li>
+                  {% endfor %}
+                </ul>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3 ">
+                <h5 class="fw-bold">colour</h5>
+                <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <input type="color" class="form-control form-control-color ms-1" style="width:200px" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">
+                  </div>
+                  <div class="col-auto">
+                    <button id="saveColourButton" type="button" class="btn btn-outline-secondary" onclick="saveColour()" disabled>apply </button>
+                  </div>
+                </div>
+            </div>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">return link</h5>
+                <p>
+                    continue the chat later using your unique return link. no need to make an account.
+                </p>
+                <div class="form-floating">
+                    <input type="text" class="form-control" id="returnLink" readonly onclick="copyToClipboard('returnLink')">
+                    <label for="returnLink">return permalink</label>
+                </div>
+            </div>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">leave chat</h5>
+                <p>
+                    when you leave the chat all of your messages and user data will be deleted.
+                </p>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -53,16 +82,32 @@
     <div class="modal fade" id="chatModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ title }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="modal-header pt-2 pb-2">
+            <h3 class="modal-title fw-bold">{{ chat.display_name }}</h3>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="focusOnMessageInput()"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-            <div class="p-2 fs-6"><strong>created</strong>: {{ chat.created }}</div>
-            <div class="p-2 fs-6"><strong>users</strong>: {{ chat.user_count }} / {{ chat.max_users }}</div>
-            <div class="form-floating mb-3">
-              <input type="text" class="form-control" id="inviteLink" readonly onclick="copyToClipboard('inviteLink')">
-              <label for="inviteLink">invite link</label>
+          <div class="modal-body p-0">
+            <div class="container p-3">
+                <h5 class="fw-bold">details</h5>
+                <ul class="ps-3" style="margin-bottom:0;">
+                  {% for key, value in chat.details.items() %}
+                    <li><strong>{{ key }}</strong>: {{ value }}</a></li>
+                  {% endfor %}
+                </ul>
+            </div>
+
+            <hr style="margin-top:4px;margin-bottom:4px">
+
+            <div class="container p-3">
+                <h5 class="fw-bold">invite others</h5>
+                <div id="inviteGenerator">
+                    <p>you can invite others to the chat by sending them a unique invite link.</p>
+                    <button id="generateInviteButton" type="button" class="btn btn-outline-primary w-50 mb-1" onclick="generateInvite()">generate invite</button>
+                    <div id="inviteLinkForm" class="form-floating mb-3 d-none">
+                        <input type="text" class="form-control" id="inviteLink" onclick="copyToClipboard('inviteLink')" readonly disabled>
+                        <label for="inviteLink">invite link</label>
+                    </div>
+                </div>
             </div>
           </div>
         </div>
@@ -73,19 +118,24 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">are you sure?</h5>
+            <h5 class="modal-title fw-bold">are you sure?</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-            <p class="p-2">
-                leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete your user details and messages.
-                <br><br>
-                are you sure?
-            </p>
-          </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="leave()">yes</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+          <div class="modal-body p-0">
+              <div class="container p-3">
+<!--                <h5 class="fw-bold">are you sure?</h5>-->
+                <p class="p-2">
+                    leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete all of
+                    your user details and messages.
+                </p>
+                {% if chat.details.users == 1 %}
+                  <p class="p-2 pt-0">
+                      you are the last user, if you leave the <strong>chat will be deleted</strong>.
+                  </p>
+                {% endif %}
+                <button type="button" class="btn btn-outline-danger" onclick="leave()">yes</button>
+                <button type="button" class="btn  btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+              </div>
           </div>
         </div>
       </div>

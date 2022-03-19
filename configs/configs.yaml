@@ -1,0 +1,57 @@
+port: 9000
+site_title: local chat
+max_user_limit: 10
+site_font:
+  body: DM Sans
+#  body: Inspiration
+
+log:
+  version: 1
+  formatters:
+    standard:
+      format: '%(asctime)s [%(levelname)s]: %(message)s'
+  handlers:
+    console:
+      level: INFO
+      formatter: standard
+      class: logging.StreamHandler
+  loggers:
+    '':
+      handlers: [ console ]
+      level: INFO
+
+database:
+  path: /Users/joshnicholls/Desktop/chat_data.db
+  tables:
+    chats: 'CREATE TABLE chats (
+              id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              display_name varchar(16) NOT NULL,
+              created datetime,
+              invite_only INTEGER
+            );'
+    users: 'CREATE TABLE users (
+              id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              chat_id	INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+              display_name varchar(32) NOT NULL,
+              joined datetime,
+              colour varchar(32)
+            );'
+    messages: 'CREATE TABLE messages (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                  chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+                  sent_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                  sent_date datetime,
+                  content varchar(255)
+               );'
+    hashmap: 'CREATE TABLE hashmap (
+              id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              hash varchar(16) NOT NULL,
+              value datetime
+            );'
+    invites: 'CREATE TABLE invites (
+              id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              chat_id varchar(16) NOT NULL,
+              issued datetime,
+              key varchar(255)
+            );'
+
