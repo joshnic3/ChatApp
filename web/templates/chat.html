@@ -24,7 +24,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h3 class="modal-title fw-bold" style="color:{{ user.colour }};">{{ user.display_name }}</h3>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="focusOnMessageInput()"></button>
           </div>
           <div class="modal-body p-0">
             <div class="container p-3">
@@ -40,20 +40,14 @@
 
             <div class="container p-3 ">
                 <h5 class="fw-bold">colour</h5>
-
-                <div class="row justify-content-start">
-                  <!-- inline form   -->
-                  <div class="col-4">
-                    <input type="color" class="form-control form-control-color ms-1" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">
+                <div class="row g-3 align-items-center">
+                  <div class="col-auto">
+                    <input type="color" class="form-control form-control-color ms-1" style="width:200px" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">
                   </div>
-                  <div class="col-8">
-                    <button id="saveColourButton" type="button" class="btn btn-sm btn-outline-secondary" onclick="saveColour()" disabled>apply </button>
+                  <div class="col-auto">
+                    <button id="saveColourButton" type="button" class="btn btn-outline-secondary" onclick="saveColour()" disabled>apply </button>
                   </div>
-                  <!-- inline form   -->
                 </div>
-
-<!--                <input type="color" class="form-control form-control-color mb-3" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">-->
-<!--                <button id="saveColourButton" type="button" class="btn btn-sm btn-outline-secondary" onclick="saveColour()" disabled>set colour</button>-->
             </div>
 
             <hr style="margin-top:4px;margin-bottom:4px">
@@ -76,7 +70,7 @@
                 <p>
                     when you leave the chat all of your messages and user data will be deleted.
                 </p>
-                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#leaveChatModal" data-bs-dismiss="modal">leave chat</button>
             </div>
 
 
@@ -90,7 +84,7 @@
         <div class="modal-content">
           <div class="modal-header pt-2 pb-2">
             <h3 class="modal-title fw-bold">{{ chat.display_name }}</h3>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="focusOnMessageInput()"></button>
           </div>
           <div class="modal-body p-0">
             <div class="container p-3">
@@ -108,7 +102,7 @@
                 <h5 class="fw-bold">invite others</h5>
                 <div id="inviteGenerator">
                     <p>you can invite others to the chat by sending them a unique invite link.</p>
-                    <button id="generateInviteButton" type="button" class="btn btn-sm btn-outline-primary w-50 mb-1" onclick="generateInvite()">generate invite</button>
+                    <button id="generateInviteButton" type="button" class="btn btn-outline-primary w-50 mb-1" onclick="generateInvite()">generate invite</button>
                     <div id="inviteLinkForm" class="form-floating mb-3 d-none">
                         <input type="text" class="form-control" id="inviteLink" onclick="copyToClipboard('inviteLink')" readonly disabled>
                         <label for="inviteLink">invite link</label>
@@ -134,13 +128,13 @@
                     leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete all of
                     your user details and messages.
                 </p>
-                {% if chat.details.user_count == 1 %}
-                  <p>
+                {% if chat.details.users == 1 %}
+                  <p class="p-2 pt-0">
                       you are the last user, if you leave the <strong>chat will be deleted</strong>.
                   </p>
                 {% endif %}
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="leave()">yes</button>
-                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+                <button type="button" class="btn btn-outline-danger" onclick="leave()">yes</button>
+                <button type="button" class="btn  btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
               </div>
           </div>
         </div>

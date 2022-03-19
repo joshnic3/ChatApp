@@ -42,7 +42,7 @@ function displayMessage(message) {
     messageDiv.classList.add("list-group-item");
     messageDiv.setAttribute("data-bs-toggle", "tooltip");
     messageDiv.setAttribute("data-bs-placement", "top");
-    messageDiv.setAttribute("title", "sent at: " + message.sent_at );
+    messageDiv.setAttribute("title", "sent at: " + message.sent_at);
     messageDiv.appendChild(displayNameHTML(message.sent_by));
     messageDiv.innerHTML += ": " + message.content;
     document.getElementById("messageBoard").appendChild(messageDiv);
@@ -67,6 +67,10 @@ function colourUpdate() {
 //    saveColourButton.style.borderColor=colorPicker.value;
 //    saveColourButton.style.backgroundColor=colorPicker.value;
     saveColourButton.disabled=false
+}
+
+function focusOnMessageInput() {
+    document.getElementById("contentInput").focus();
 }
 
 
@@ -135,7 +139,7 @@ document.getElementById("contentInput").addEventListener("keyup", function(event
 
 window.onload = function(){
     getMessages();
-    document.getElementById("contentInput").focus();
+    focusOnMessageInput();
     document.getElementById("returnLink").value = 'http://'+currentURL+'?u='+getCookie('userId');
     socket.emit(join_event, {chat_id: getChatIdFromURL()});
 };

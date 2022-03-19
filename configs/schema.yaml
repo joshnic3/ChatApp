@@ -5,7 +5,6 @@ sql:
             "id"	INTEGER NOT NULL UNIQUE,
             "display_name"	varchar(16) NOT NULL,
             "created"	datetime,
-            "max_users"	INTEGER,
             "invite_only" INTEGER,
             PRIMARY KEY("id" AUTOINCREMENT)
           );'

@@ -4,18 +4,19 @@ from lib.formatting import format_datetime
 import bleach
 
 
-def new_chat_manager(dao, display_name, max_users=10, invite_only=True):
+def new_chat_manager(dao, display_name, max_user_limit, invite_only=True):
     created = datetime.now()
     chat_id = dao.insert('chats', [
-        display_name, created.strftime(ChatManager.DT_FORMAT), max_users, int(invite_only)])[0]
-    return ChatManager(dao, chat_id)
+        display_name, created.strftime(ChatManager.DT_FORMAT), int(invite_only)])[0]
+    return ChatManager(dao, chat_id, max_user_limit)
 
 
 class ChatManager:
 
     DT_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-    def __init__(self, dao, chat_id):
+    def __init__(self, dao, chat_id, max_user_limit):
+        self.max_user_limit = max_user_limit
         self.chat_id = chat_id
         self.dao = dao
         self.chat = self._load_chat()
@@ -45,14 +46,14 @@ class ChatManager:
     def _load_chat(self):
         results = self.dao.select('chats', {'id': self.chat_id}, return_one=True)
         chat_list = [
-            int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), int(results[3]), bool(results[4])]
+            int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), bool(results[3])]
         chat = Chat.from_list(chat_list)
         chat.users = self._load_users()
         chat.messages = self._load_messages()
         return chat
 
     def new_user(self, display_name):
-        if len(self.chat.users) + 1 > self.chat.max_users:
+        if len(self.chat.users) + 1 > self.max_user_limit:
             return None
         joined = datetime.now()
         colour = self._next_colour()
@@ -97,7 +98,7 @@ class Message:
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
-            'sent_at': format_datetime(self.send_at),
+            'sent_at': format_datetime(self.send_at, full=True),
             'sent_by': self.sent_by,
             'content': bleach.clean(self.content)
         }
@@ -133,13 +134,12 @@ class Chat:
     @staticmethod
     def from_list(chat_list):
         chat = Chat()
-        chat.id, chat.display_name, chat.created, chat.max_users, chat.invite_only = chat_list
+        chat.id, chat.display_name, chat.created, chat.invite_only = chat_list
         return chat
 
     def __init__(self):
         self.id = None
         self.display_name = None
-        self.max_users = None
         self.created = None
         # TODO Make this a user toggleable item. Needs to be False as default
         self.invite_only = False
@@ -152,9 +152,7 @@ class Chat:
         return {
             'details': {
                 'created': format_datetime(self.created, full=True),
-                'user_count': len(self.users),
-                'max_users': self.max_users
-
+                'users': len(self.users)
             },
             'display_name': bleach.clean(self.display_name),
         }

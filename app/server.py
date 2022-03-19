@@ -17,6 +17,7 @@ import urllib.parse
 
 
 SITE_TITLE = 'local chat'
+MAX_USER_LIMIT = 100
 SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
@@ -82,7 +83,7 @@ def broadcast_message(chat, user, content):
 @app.route('/api/new_chat', methods=['POST'])
 def new_chat():
     data = request.get_json()
-    cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')), int(data.get('invite_only')))
+    cm = new_chat_manager(dao, data.get('chat_name'), MAX_USER_LIMIT, int(data.get('invite_only')))
     hashed_id = hm.encode(cm.chat_id, hash_method=CHAT_ID_HASH)
     chat_managers[hashed_id] = cm
     return make_response({'accepted': {'chat_id': hashed_id}})
@@ -104,7 +105,7 @@ def new_user():
                     'display_name': user.display_name}
             })
     else:
-        return _error_response('chat has reached its user limit.')
+        return _error_response(f'chat has reached user limit of {cm.max_user_limit}.')
 
 
 @app.route('/api/change_user_colour', methods=['POST'])
@@ -175,7 +176,7 @@ def chat_page(chat_id_hash):
 
     if chat_id_hash not in chat_managers:
         # Chat manager is not in cache so create one.
-        chat_managers[chat_id_hash] = ChatManager(dao, chat_id)
+        chat_managers[chat_id_hash] = ChatManager(dao, chat_id, MAX_USER_LIMIT)
 
     chat = chat_managers.get(chat_id_hash).chat
 
@@ -189,7 +190,7 @@ def chat_page(chat_id_hash):
 
     if isinstance(user, User):
         return render_template('chat.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=user.as_dict())
-    elif (valid_invite and chat.invite_only) or not chat.invite_only:
+    elif (valid_invite and chat.invite_only) or not chat.invite_only or not chat.users:
         return render_template('join.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=None)
     else:
         return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
