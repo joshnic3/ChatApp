@@ -17,6 +17,7 @@ import urllib.parse
 
 
 SITE_TITLE = 'chat'
+SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
@@ -77,7 +78,7 @@ def broadcast_message(chat, user, content):
 @app.route('/api/new_chat', methods=['POST'])
 def new_chat():
     data = request.get_json()
-    cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')))
+    cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')), int(data.get('invite_only')))
     hashed_id = hm.encode(cm.chat_id, hash_method=CHAT_ID_HASH)
     chat_managers[hashed_id] = cm
     return make_response({'accepted': {'chat_id': hashed_id}})
@@ -87,10 +88,19 @@ def new_chat():
 def new_user():
     data = request.get_json()
     cm = chat_managers.get(data.get('chat_id'))
-    user = cm.new_user(data.get('display_name'))
+    user = cm.new_user(data.get('display_name').lower())
     chat = cm.chat
     broadcast_message(chat, None, f'{user.display_name} has joined the chat')
     response = make_response({'accepted': {'chat_id': data.get('chat_id'), 'user_id': hm.encode(user.id, USER_ID_HASH), 'display_name': user.display_name}})
+    return response
+
+
+@app.route('/api/change_user_colour', methods=['POST'])
+def change_user_colour():
+    data = request.get_json()
+    cm = chat_managers.get(data.get('chat_id'))
+    cm.change_user_colour(hm.decode(request.cookies.get('userId')), data.get('colour'))
+    response = make_response({'accepted': {'colour': data.get('colour')}})
     return response
 
 
@@ -126,8 +136,7 @@ def leave():
 @app.route('/api/invite', methods=['POST'])
 def generate_invite():
     data = request.get_json()
-    chat_id_hash = data.get('chat_id')
-    cm = chat_managers.get(chat_id_hash)
+    cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
     if isinstance(user, str):
@@ -139,7 +148,7 @@ def generate_invite():
 # *** HTML *** ---------------------------------------
 @app.route('/')
 def landing():
-    return render_template('index.html', site_title=SITE_TITLE,)
+    return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
 
 
 @app.route('/<chat_id_hash>')
@@ -148,7 +157,7 @@ def chat_page(chat_id_hash):
     chat_id = hm.decode(chat_id_hash)
     if chat_id is None:
         # Chat id hash is not in map.
-        return render_template('index.html', site_title=SITE_TITLE,)
+        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
 
     if chat_id_hash not in chat_managers:
         # Chat manager is not in cache so create one.
@@ -165,11 +174,11 @@ def chat_page(chat_id_hash):
     valid_invite = im.validate_invite(chat, invite_key) if invite_key else False
 
     if isinstance(user, User):
-        return render_template('chat.html', site_title=SITE_TITLE, title=chat.display_name, chat=chat.as_dict(), user=user.as_dict())
-    elif valid_invite or not chat.invite_only:
-        return render_template('join.html', site_title=SITE_TITLE, title=chat.display_name)
+        return render_template('chat.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=user.as_dict())
+    elif (valid_invite and chat.invite_only) or not chat.invite_only:
+        return render_template('join.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=None)
     else:
-        return render_template('index.html', site_title=SITE_TITLE)
+        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
 
 
 if __name__ == '__main__':

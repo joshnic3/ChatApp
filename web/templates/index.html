@@ -4,31 +4,32 @@
     http://192.168.8.191:9000
 {% endblock %}
 
-{% block nav_title %}
-    <div class="nav-item navbar-brand d-flex p-0 m-0">
-        <a href="/" class="link-dark p-1 pt-0 pb-0 m-0 text-decoration-none">{{ site_title }}</a>
-    </div>
-{% endblock %}
-
-
 {% block content %}
-    <h4>what is this?</h4>
-    <ul class="">
+    <h5 class="fw-bold">what is this?</h5>
+    <ul class="ps-3" style="margin-bottom:0;">
       <li>create a new chat and invite others</li>
       <li>no need to login, just use the return link when you want to rejoin</li>
       <li>when the last person leaves the chat, it gets deleted</li>
     </ul>
     <hr>
-    <h4>get started</h4>
-    <div class="form-floating m-3">
+    <h5 class="fw-bold">get started</h5>
+    <div class="form-floating mb-3">
       <input type="text" class="form-control" id="chatNameInput" placeholder="chat name" oninput="dynamicForm()">
       <label for="floatingInput">enter chat name</label>
     </div>
-    <div class="form-floating m-3">
+    <div class="form-floating mb-3">
       <input pattern="[0-9]*" type="number" id="maxUserInput" class="form-control" value="5"/>
       <label class="form-label" for="maxUserInput">max users</label>
     </div>
-    <button type="button" id="createChatButton" class="btn btn-outline-primary m-3 mt-0" disabled onclick="createChatClick()" >create </button>
+    <!-- inline form   -->
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="inviteOnlyCheck" checked>
+      <label class="form-check-label" for="inviteOnlyCheck">
+        invite only
+      </label>
+    </div>
+    <button type="button" id="createChatButton" class="btn btn-outline-primary mt-0" disabled onclick="createChatClick()" >create </button>
+    <!-- inline form   -->
 {% endblock %}
 
 {% block modals %}

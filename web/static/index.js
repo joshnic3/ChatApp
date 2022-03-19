@@ -25,9 +25,11 @@ function newChatResponse(data) {
 function createChatClick() {
     let chatNameInput = document.getElementById("chatNameInput")
     let maxUsersInput = document.getElementById("maxUserInput")
+    let inviteOnlyCheck = document.getElementById("inviteOnlyCheck")
     let data = {
         'chat_name': sanitizeChatName(chatNameInput.value),
-        'max_users': maxUsersInput.value
+        'max_users': maxUsersInput.value,
+        'invite_only': inviteOnlyCheck.checked
     };
     apiPost('new_chat', data, newChatResponse);
 }

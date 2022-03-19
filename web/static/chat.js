@@ -33,7 +33,7 @@ function displayNameHTML(user) {
     }
     let fromText = document.createElement("strong")
     fromText.innerHTML = displayName;
-    fromText.classList.add("text-" + colour);
+    fromText.style.color = colour;
     return fromText
 }
 
@@ -60,6 +60,15 @@ function copyToClipboard(elementId) {
     console.log(copyText.value);
 }
 
+function colourUpdate() {
+    var colorPicker = document.getElementById("colorPicker");
+    var saveColourButton = document.getElementById("saveColourButton");
+    saveColourButton.innerHTML = 'apply ' + colorPicker.value;
+//    saveColourButton.style.borderColor=colorPicker.value;
+//    saveColourButton.style.backgroundColor=colorPicker.value;
+    saveColourButton.disabled=false
+}
+
 
 // Response callback functions.
 function displayMessages(data) {
@@ -76,15 +85,27 @@ function leaveResponse(data) {
 }
 
 function generateInviteResponse(data) {
-    inviteLink = document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
+    document.getElementById("generateInviteButton").innerHTML = 'generate a new invite';
     inviteLink = document.getElementById("inviteLink");
+    inviteLink.focus();
     inviteLink.value = 'http://'+currentURL+'?i='+data.accepted.key;
     inviteLink.disabled = false;
+
     copyToClipboard("inviteLink");
+
+    inviteLinkForm = document.getElementById("inviteLinkForm");
+    inviteLinkForm.classList.remove('d-none')
 }
 
 
 // API calls.
+function saveColour() {
+    var colorPicker = document.getElementById("colorPicker");
+    apiPost('change_user_colour', {'chat_id': getChatIdFromURL(), 'colour': colorPicker.value}, console.log);
+    location.reload();
+}
+
+
 function getMessages() {
     apiPost('get_messages', {chat_id: getChatIdFromURL(), limit: 100}, displayMessages);
 }

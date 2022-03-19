@@ -1,12 +1,13 @@
 import random
 from datetime import datetime
-
+from lib.formatting import format_datetime
 import bleach
 
 
-def new_chat_manager(dao, display_name, max_users=10):
+def new_chat_manager(dao, display_name, max_users=10, invite_only=True):
     created = datetime.now()
-    chat_id = dao.insert('chats', [display_name, created.strftime(ChatManager.DT_FORMAT), max_users])[0]
+    chat_id = dao.insert('chats', [
+        display_name, created.strftime(ChatManager.DT_FORMAT), max_users, int(invite_only)])[0]
     return ChatManager(dao, chat_id)
 
 
@@ -19,11 +20,10 @@ class ChatManager:
         self.dao = dao
         self.chat = self._load_chat()
         self.colours = [
-            'primary',
-            'success',
-            'danger',
-            'warning',
-            'info'
+            '#000000',
+            '#ff0000',
+            '#00ff00',
+            '#0000ff'
         ]
         random.shuffle(self.colours)
 
@@ -44,13 +44,15 @@ class ChatManager:
 
     def _load_chat(self):
         results = self.dao.select('chats', {'id': self.chat_id}, return_one=True)
-        chat_list = [int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), int(results[3])]
+        chat_list = [
+            int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), int(results[3]), bool(results[4])]
         chat = Chat.from_list(chat_list)
         chat.users = self._load_users()
         chat.messages = self._load_messages()
         return chat
 
     def new_user(self, display_name):
+        # TODO Check number of users and max users
         joined = datetime.now()
         colour = self._next_colour()
         user_id = self.dao.insert('users',
@@ -63,6 +65,10 @@ class ChatManager:
         # TODO ON DELETE CASCADE
         self.dao.delete('users', {'id': user_id})
         self.chat.users.pop(user_id)
+
+    def change_user_colour(self, user_id, colour):
+        self.dao.update('users', {'colour': colour}, {'id': user_id})
+        self.chat.users[user_id].colour = colour
 
     def new_message(self, user_id, content):
         sent_at = datetime.now()
@@ -89,7 +95,7 @@ class Message:
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
-            'sent_at': self.send_at.strftime('%d/%m/%Y %H:%M'),
+            'sent_at': format_datetime(self.send_at),
             'sent_by': self.sent_by,
             'content': bleach.clean(self.content)
         }
@@ -112,8 +118,10 @@ class User:
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
+            'details': {
+                'joined': format_datetime(self.joined),
+            },
             'display_name': bleach.clean(self.display_name),
-            'joined': self.joined.strftime('%d/%m/%Y %H:%M'),
             'colour': self.colour,
         }
 
@@ -123,7 +131,7 @@ class Chat:
     @staticmethod
     def from_list(chat_list):
         chat = Chat()
-        chat.id, chat.display_name, chat.created, chat.max_users = chat_list
+        chat.id, chat.display_name, chat.created, chat.max_users, chat.invite_only = chat_list
         return chat
 
     def __init__(self):
@@ -138,9 +146,13 @@ class Chat:
 
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
+
         return {
+            'details': {
+                'created': format_datetime(self.created),
+                'user count': len(self.users),
+                'max users': self.max_users
+
+            },
             'display_name': bleach.clean(self.display_name),
-            'max_users': self.max_users,
-            'created': self.created.strftime('%d/%m/%Y %H:%M'),
-            'user_count': len(self.users)
         }
