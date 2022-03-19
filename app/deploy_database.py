@@ -1,6 +1,10 @@
-import sys
 import argparse
+import logging
+import logging.config
+import sys
+
 import yaml
+
 from lib.database import DAO
 
 
@@ -11,13 +15,13 @@ class DatabaseManager:
 
     def create_tables(self, sql_dict):
         for table, sql in sql_dict.items():
-            print(f'Creating table {table}...')
             self.dao.execute(sql)
+            logging.info(f'Created table {table}.')
 
     def insert_rows(self, rows_dict):
         for table, rows in rows_dict.items():
-            print(f'Inserting {len(rows)} into table {table}...')
             self.dao.insert_many(table, rows)
+            logging.info(f'Inserted {len(rows)} into table {table}.')
 
 
 def parse_configs():
@@ -34,10 +38,11 @@ def parse_configs():
 
 def main():
     configs = parse_configs()
-    dbm = DatabaseManager(configs.get('path'))
-    dbm.create_tables(configs.get('database').get('path'))
-    # if configs.get('rows'):
-    #     dbm.insert_rows(configs.get('rows'))
+    logging.config.dictConfig(configs.get('log'))
+    dbm = DatabaseManager(configs.get('database').get('path'))
+    dbm.create_tables(configs.get('database').get('tables'))
+    if configs.get('database').get('rows'):
+        dbm.insert_rows(configs.get('database').get('rows'))
     return 0
 
 

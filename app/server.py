@@ -10,7 +10,7 @@ import sys
 import yaml
 from flask import Flask, render_template, request, make_response
 from flask_socketio import SocketIO, join_room, leave_room
-
+import logging.config
 from lib.chat import User, Chat, ChatManager, new_chat_manager
 from lib.database import DAO
 from lib.hashing import HashManager, SHAKE256_3, SHA256
@@ -22,6 +22,8 @@ USER_ID_HASH = SHA256
 template_dir = os.path.abspath('../web/templates')
 static_dir = os.path.abspath('../web/static')
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
+
+
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socket_io = SocketIO(app)
 
@@ -207,10 +209,13 @@ def parse_configs():
 def main():
     global dao, hm, im, configs
     configs = parse_configs()
+    logging.config.dictConfig(configs.get('log'))
+
     dao = DAO(configs.get('database').get('path'))
     hm = HashManager(dao)
     im = InviteManager(dao)
-    socket_io.run(app, port=configs.get('port'), host="0.0.0.0", debug=True)
+
+    socket_io.run(app, port=configs.get('port'), host="0.0.0.0", debug=False)
 
     return 0
 
