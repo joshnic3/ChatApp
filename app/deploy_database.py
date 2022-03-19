@@ -36,6 +36,8 @@ def main():
     configs = parse_configs()
     dbm = DatabaseManager(configs.get('path'))
     dbm.create_tables(configs.get('sql'))
+    if configs.get('rows'):
+        dbm.insert_rows(configs.get('rows'))
     return 0
 
 

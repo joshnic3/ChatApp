@@ -23,6 +23,7 @@ class DAO:
         # TODO Almost definitely not thread safe!
         self.connection = sqlite3.connect(file_path, check_same_thread=False)
         self.cursor = self.connection.cursor()
+        self.cursor.execute('PRAGMA foreign_keys = ON;')
 
     def execute(self, sql, params=(), return_one=False):
         results = self.cursor.execute(sql, params)
@@ -36,6 +37,7 @@ class DAO:
 
     def insert_many(self, table, rows):
         for row in rows:
+            row = [None] + row
             self.execute(f'INSERT INTO {table} VALUES ({_wildcards(row)});', _list_to_str(row))
 
     def select(self, table, condition, return_one=False):

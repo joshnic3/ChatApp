@@ -8,25 +8,24 @@ import os
 from flask import Flask, render_template, request, make_response
 from flask_socketio import SocketIO, join_room, leave_room
 
-from lib.chat import User, ChatManager, new_chat_manager
+from lib.chat import User, Chat, ChatManager, new_chat_manager
 from lib.database import DAO
 from lib.invites import InviteManager
 from lib.hashing import HashManager, SHAKE256_3, SHA256
 
 import urllib.parse
 
-
+# TODO read from yaml file
 SITE_TITLE = 'local chat'
-MAX_USER_LIMIT = 100
+MAX_USER_LIMIT = 10
 SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
-DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
+DB_PATH = '/Users/joshnicholls/Desktop/chat_data.db'
+
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
 
 template_dir = os.path.abspath('../web/templates')
 static_dir = os.path.abspath('../web/static')
-
-
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socket_io = SocketIO(app)
@@ -65,17 +64,15 @@ def on_leave(data):
 def receive_message(data):
     cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
-
     user = chat.users.get(hm.decode(data.get('userId')))
     if isinstance(user, User):
         broadcast_message(chat, user, data.get('content'))
 
 
 def broadcast_message(chat, user, content):
-    from_id = user.id if isinstance(user, User) else None
     hashed_id = hm.encode(chat.id, hash_method=CHAT_ID_HASH)
     cm = chat_managers.get(hashed_id)
-    message = cm.new_message(from_id, content)
+    message = cm.new_message(user, content)
     socket_io.emit('broadcast_message', _message_as_dict(message, chat), to=hashed_id)
 
 
@@ -142,7 +139,8 @@ def leave():
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
     if isinstance(user, User):
         cm.delete_user(user.id)
-        broadcast_message(chat, None, f'{user.display_name} left the chat')
+        if isinstance(cm.chat, Chat):
+            broadcast_message(chat, None, f'{user.display_name} left the chat')
         return make_response({'removed': True})
     else:
         return _error_response(f'failed to remove user from {data.get("chat_id")}.')
@@ -179,6 +177,8 @@ def chat_page(chat_id_hash):
         chat_managers[chat_id_hash] = ChatManager(dao, chat_id, MAX_USER_LIMIT)
 
     chat = chat_managers.get(chat_id_hash).chat
+    if not isinstance(chat, Chat):
+        return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
 
     # Handle returning user.
     user_id = request.args.get('u') if request.args.get('u') else request.cookies.get('userId')

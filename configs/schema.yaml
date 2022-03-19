@@ -1,41 +1,34 @@
-path: /Users/joshnicholls/Desktop/tempchat.db
+path: /Users/joshnicholls/Desktop/chat_data.db
 
 sql:
-  chats: 'CREATE TABLE "chats" (
-            "id"	INTEGER NOT NULL UNIQUE,
-            "display_name"	varchar(16) NOT NULL,
-            "created"	datetime,
-            "invite_only" INTEGER,
-            PRIMARY KEY("id" AUTOINCREMENT)
+  chats: 'CREATE TABLE chats (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            display_name varchar(16) NOT NULL,
+            created datetime,
+            invite_only INTEGER
           );'
-  users: 'CREATE TABLE "users" (
-          	"id"	INTEGER NOT NULL UNIQUE,
-          	"chat_id"	INTEGER NOT NULL,
-          	"display_name"	varchar(32) NOT NULL,
-          	"joined"	datetime,
-          	"colour"	varchar(32),
-          	FOREIGN KEY("chat_id") REFERENCES "chats"("id") ON DELETE CASCADE,
-          	PRIMARY KEY("id" AUTOINCREMENT)
+  users: 'CREATE TABLE users (
+          	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          	chat_id	INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+          	display_name varchar(32) NOT NULL,
+          	joined datetime,
+          	colour varchar(32)
           );'
-  messages: 'CREATE TABLE "messages" (
-             	"id"	INTEGER NOT NULL UNIQUE,
-             	"chat_id"	INTEGER NOT NULL,
-             	"sent_by"	INTEGER,
-             	"sent_date"	datetime,
-             	"content"	varchar(255),
-             	PRIMARY KEY("id" AUTOINCREMENT),
-             	FOREIGN KEY("chat_id") REFERENCES "chats"("id") ON DELETE CASCADE
+  messages: 'CREATE TABLE messages (
+             	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+             	chat_id INTEGER REFERENCES chats(id) ON DELETE CASCADE,
+             	sent_by INTEGER REFERENCES users(id) ON DELETE CASCADE,
+             	sent_date datetime,
+             	content varchar(255)
              );'
-  hashmap: 'CREATE TABLE "hashmap" (
-            "id"	INTEGER NOT NULL UNIQUE,
-            "hash"	varchar(16) NOT NULL,
-            "value"	datetime,
-            PRIMARY KEY("id" AUTOINCREMENT)
+  hashmap: 'CREATE TABLE hashmap (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            hash varchar(16) NOT NULL,
+            value datetime
           );'
-  invites: 'CREATE TABLE "invites" (
-            "id"	INTEGER NOT NULL UNIQUE,
-            "chat_id"	varchar(16) NOT NULL,
-            "issued"  datetime,
-            "key"	varchar(255),
-            PRIMARY KEY("id" AUTOINCREMENT)
+  invites: 'CREATE TABLE invites (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            chat_id varchar(16) NOT NULL,
+            issued datetime,
+            key varchar(255)
           );'

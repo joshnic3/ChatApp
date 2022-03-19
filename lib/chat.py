@@ -64,17 +64,25 @@ class ChatManager:
         return user
 
     def delete_user(self, user_id):
-        # TODO ON DELETE CASCADE
         self.dao.delete('users', {'id': user_id})
         self.chat.users.pop(user_id)
+
+        # Delete all messages from user.
+        self.chat.messages = [m for m in self.chat.messages if m.sent_by != user_id]
+
+        # If there are no more users, delete the chat.
+        if not self.chat.users:
+            self.dao.delete('chats', {'id': self.chat.id})
+            self.chat = None
 
     def change_colour(self, obj, colour):
         if isinstance(obj, User):
             self.dao.update('users', {'colour': colour}, {'id': obj.id})
             self.chat.users[obj.id].colour = colour
 
-    def new_message(self, user_id, content):
+    def new_message(self, user, content):
         sent_at = datetime.now()
+        user_id = user.id if user else None
         message_id = self.dao.insert('messages', [self.chat_id, user_id, sent_at.strftime(self.DT_FORMAT), content])
         message = Message.from_list([message_id, user_id, sent_at, content.lower()])
         self.chat.messages.append(message)
@@ -141,7 +149,6 @@ class Chat:
         self.id = None
         self.display_name = None
         self.created = None
-        # TODO Make this a user toggleable item. Needs to be False as default
         self.invite_only = False
         self.users = {}
         self.messages = []
