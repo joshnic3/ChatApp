@@ -1,6 +1,6 @@
 import random
 from datetime import datetime
-
+from lib.formatting import format_datetime
 import bleach
 
 
@@ -95,7 +95,7 @@ class Message:
     def as_dict(self):
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
-            'sent_at': self.send_at.strftime('%d/%m/%Y %H:%M'),
+            'sent_at': format_datetime(self.send_at),
             'sent_by': self.sent_by,
             'content': bleach.clean(self.content)
         }
@@ -119,7 +119,7 @@ class User:
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
             'details': {
-                'joined': self.joined.strftime('%d/%m/%Y %H:%M'),
+                'joined': format_datetime(self.joined),
             },
             'display_name': bleach.clean(self.display_name),
             'colour': self.colour,
@@ -149,7 +149,7 @@ class Chat:
 
         return {
             'details': {
-                'created': self.created.strftime('%d/%m/%Y %H:%M'),
+                'created': format_datetime(self.created),
                 'user count': len(self.users),
                 'max users': self.max_users
 
