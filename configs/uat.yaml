@@ -22,7 +22,7 @@ log:
       level: INFO
 
 database:
-  path: /Users/joshnicholls/Desktop/chat_data.db
+  path: /home/robot/drive/chat_data.db
   tables:
     chats: 'CREATE TABLE chats (
               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
