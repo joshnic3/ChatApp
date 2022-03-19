@@ -6,6 +6,7 @@ sql:
             "display_name"	varchar(16) NOT NULL,
             "created"	datetime,
             "max_users"	INTEGER,
+            "invite_only" INTEGER,
             PRIMARY KEY("id" AUTOINCREMENT)
           );'
   users: 'CREATE TABLE "users" (

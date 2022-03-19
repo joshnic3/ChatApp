@@ -42,12 +42,14 @@
                 <h5 class="fw-bold">colour</h5>
 
                 <div class="row justify-content-start">
-                  <div class="col-2">
-                    <input type="color" class="form-control form-control-color mb-3 p-0" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">
+                  <!-- inline form   -->
+                  <div class="col-4">
+                    <input type="color" class="form-control form-control-color ms-1" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">
                   </div>
                   <div class="col-8">
                     <button id="saveColourButton" type="button" class="btn btn-sm btn-outline-secondary" onclick="saveColour()" disabled>apply </button>
                   </div>
+                  <!-- inline form   -->
                 </div>
 
 <!--                <input type="color" class="form-control form-control-color mb-3" value="{{ user.colour }}" id="colorPicker" onchange="colourUpdate()">-->

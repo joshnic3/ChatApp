@@ -4,9 +4,10 @@ from datetime import datetime
 import bleach
 
 
-def new_chat_manager(dao, display_name, max_users=10):
+def new_chat_manager(dao, display_name, max_users=10, invite_only=True):
     created = datetime.now()
-    chat_id = dao.insert('chats', [display_name, created.strftime(ChatManager.DT_FORMAT), max_users])[0]
+    chat_id = dao.insert('chats', [
+        display_name, created.strftime(ChatManager.DT_FORMAT), max_users, int(invite_only)])[0]
     return ChatManager(dao, chat_id)
 
 
@@ -43,13 +44,15 @@ class ChatManager:
 
     def _load_chat(self):
         results = self.dao.select('chats', {'id': self.chat_id}, return_one=True)
-        chat_list = [int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), int(results[3])]
+        chat_list = [
+            int(results[0]), results[1], datetime.strptime(results[2], self.DT_FORMAT), int(results[3]), bool(results[4])]
         chat = Chat.from_list(chat_list)
         chat.users = self._load_users()
         chat.messages = self._load_messages()
         return chat
 
     def new_user(self, display_name):
+        # TODO Check number of users and max users
         joined = datetime.now()
         colour = self._next_colour()
         user_id = self.dao.insert('users',
@@ -128,7 +131,7 @@ class Chat:
     @staticmethod
     def from_list(chat_list):
         chat = Chat()
-        chat.id, chat.display_name, chat.created, chat.max_users = chat_list
+        chat.id, chat.display_name, chat.created, chat.max_users, chat.invite_only = chat_list
         return chat
 
     def __init__(self):

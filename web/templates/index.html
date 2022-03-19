@@ -21,7 +21,15 @@
       <input pattern="[0-9]*" type="number" id="maxUserInput" class="form-control" value="5"/>
       <label class="form-label" for="maxUserInput">max users</label>
     </div>
+    <!-- inline form   -->
+    <div class="form-check">
+      <input class="form-check-input" type="checkbox" id="inviteOnlyCheck" checked>
+      <label class="form-check-label" for="inviteOnlyCheck">
+        invite only
+      </label>
+    </div>
     <button type="button" id="createChatButton" class="btn btn-outline-primary mt-0" disabled onclick="createChatClick()" >create </button>
+    <!-- inline form   -->
 {% endblock %}
 
 {% block modals %}

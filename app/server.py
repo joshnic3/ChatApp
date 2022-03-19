@@ -78,7 +78,7 @@ def broadcast_message(chat, user, content):
 @app.route('/api/new_chat', methods=['POST'])
 def new_chat():
     data = request.get_json()
-    cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')))
+    cm = new_chat_manager(dao, data.get('chat_name'), int(data.get('max_users')), int(data.get('invite_only')))
     hashed_id = hm.encode(cm.chat_id, hash_method=CHAT_ID_HASH)
     chat_managers[hashed_id] = cm
     return make_response({'accepted': {'chat_id': hashed_id}})
@@ -102,7 +102,6 @@ def change_user_colour():
     cm.change_user_colour(hm.decode(request.cookies.get('userId')), data.get('colour'))
     response = make_response({'accepted': {'colour': data.get('colour')}})
     return response
-
 
 
 @app.route('/api/get_messages', methods=['POST'])
@@ -137,8 +136,7 @@ def leave():
 @app.route('/api/invite', methods=['POST'])
 def generate_invite():
     data = request.get_json()
-    chat_id_hash = data.get('chat_id')
-    cm = chat_managers.get(chat_id_hash)
+    cm = chat_managers.get(data.get('chat_id'))
     chat = cm.chat
     user = chat.users.get(hm.decode(request.cookies.get('userId')))
     if isinstance(user, str):
@@ -177,7 +175,7 @@ def chat_page(chat_id_hash):
 
     if isinstance(user, User):
         return render_template('chat.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=user.as_dict())
-    elif valid_invite or not chat.invite_only:
+    elif (valid_invite and chat.invite_only) or not chat.invite_only:
         return render_template('join.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=chat.as_dict(), user=None)
     else:
         return render_template('index.html', site_title=SITE_TITLE, site_font=SITE_FONT, chat=None, user=None)
