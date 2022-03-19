@@ -19,8 +19,9 @@ from lib.invites import InviteManager
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
 
-template_dir = os.path.abspath('../web/templates')
-static_dir = os.path.abspath('../web/static')
+template_dir = os.path.abspath('./web/templates')
+static_dir = os.path.abspath('./web/static')
+print(static_dir)
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 
 
@@ -215,7 +216,7 @@ def main():
     hm = HashManager(dao)
     im = InviteManager(dao)
 
-    socket_io.run(app, port=configs.get('port'), host="0.0.0.0", debug=False)
+    socket_io.run(app, port=configs.get('port'), host="0.0.0.0", debug=configs.get('debug_mode'))
 
     return 0
 
