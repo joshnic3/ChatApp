@@ -16,7 +16,7 @@ from lib.hashing import HashManager, SHAKE256_3, SHA256
 import urllib.parse
 
 
-SITE_TITLE = 'lan chat'
+SITE_TITLE = 'local chat'
 SITE_FONT = {'body': 'DM Sans', 'brand': 'Bebas Neue'}
 DB_PATH = '/Users/joshnicholls/Desktop/tempchat.db'
 CHAT_ID_HASH = SHAKE256_3

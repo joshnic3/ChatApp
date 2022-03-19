@@ -121,7 +121,7 @@ class User:
         # This goes straight out to the client so sanitize anything that is input but the user.
         return {
             'details': {
-                'joined': format_datetime(self.joined),
+                'joined': format_datetime(self.joined, full=True),
             },
             'display_name': bleach.clean(self.display_name),
             'colour': self.colour,
@@ -151,9 +151,9 @@ class Chat:
 
         return {
             'details': {
-                'created': format_datetime(self.created),
-                'user count': len(self.users),
-                'max users': self.max_users
+                'created': format_datetime(self.created, full=True),
+                'user_count': len(self.users),
+                'max_users': self.max_users
 
             },
             'display_name': bleach.clean(self.display_name),

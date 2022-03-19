@@ -1,7 +1,11 @@
 from datetime import datetime, timedelta
 
 # TODO should be done on client side for live updates. but the logic is here.
-def format_datetime(datetime_obj):
+
+def format_datetime(datetime_obj, full=False):
+    full_str = datetime_obj.strftime('%-d %B %Y at %H:%M')
+    if full:
+        return full_str
     now = datetime.now()
     if datetime_obj > (now - timedelta(minutes=1)):
         return f'just now'
@@ -14,4 +18,4 @@ def format_datetime(datetime_obj):
     elif datetime_obj > (now - timedelta(hours=48)):
         return f'yesterday'
     else:
-        return datetime_obj.strftime('%d/%m/%Y %H:%M')
+        return full_str

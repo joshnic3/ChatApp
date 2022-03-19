@@ -124,19 +124,24 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">are you sure?</h5>
+            <h5 class="modal-title fw-bold">are you sure?</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body pt-0 pb-0">
-            <p class="p-2">
-                leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete your user details and messages.
-                <br><br>
-                are you sure?
-            </p>
-          </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-outline-danger" onclick="leave()">yes</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+          <div class="modal-body p-0">
+              <div class="container p-3">
+<!--                <h5 class="fw-bold">are you sure?</h5>-->
+                <p class="p-2">
+                    leaving the chat will <strong>permanently</strong> and <strong>irreversibly</strong> delete all of
+                    your user details and messages.
+                </p>
+                {% if chat.details.user_count == 1 %}
+                  <p>
+                      you are the last user, if you leave the <strong>chat will be deleted</strong>.
+                  </p>
+                {% endif %}
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="leave()">yes</button>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">no, i want to stay</button>
+              </div>
           </div>
         </div>
       </div>
