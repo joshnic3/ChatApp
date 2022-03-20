@@ -1,4 +1,4 @@
-port: 9000
+port: 80
 debug_mode: False
 site_title: local chat
 max_user_limit: 10
