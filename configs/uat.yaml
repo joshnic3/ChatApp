@@ -1,4 +1,4 @@
-port: 9000
+port: 5000
 debug_mode: False
 site_title: local chat
 max_user_limit: 10
@@ -22,7 +22,7 @@ log:
       level: INFO
 
 database:
-  path: /home/robot/drive/chat_data.db
+  path: ../../../../drive/ChatAppData/chat_data.db
   tables:
     chats: 'CREATE TABLE chats (
               id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
