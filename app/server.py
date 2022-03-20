@@ -19,9 +19,8 @@ from lib.invites import InviteManager
 CHAT_ID_HASH = SHAKE256_3
 USER_ID_HASH = SHA256
 
-template_dir = os.path.abspath('./web/templates')
-static_dir = os.path.abspath('./web/static')
-print(static_dir)
+template_dir = os.path.abspath('../web/templates')
+static_dir = os.path.abspath('../web/static')
 app = Flask(__name__, static_folder=static_dir, template_folder=template_dir)
 
 
