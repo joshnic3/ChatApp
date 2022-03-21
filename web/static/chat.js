@@ -24,9 +24,9 @@ function sendMessage() {
 // Dynamic UI.
 function displayNameHTML(user) {
     let displayName = '';
-    let colour = 'secondary';
+    let colour = '#a1a1a1';
     if (user == null) {
-        displayName = 'server';
+        displayName = '~';
     } else {
         displayName = user.display_name;
         colour = user.colour;
@@ -34,7 +34,16 @@ function displayNameHTML(user) {
     let fromText = document.createElement("strong")
     fromText.innerHTML = displayName;
     fromText.style.color = colour;
+    fromText.classList.add("pe-1");
     return fromText
+}
+
+function messageContextHTML(message) {
+    let messageHTML =  message.content;
+    if (message.sent_by == null) {
+        messageHTML =  '<i>'+message.content+'</i>';
+    }
+    return messageHTML;
 }
 
 function displayMessage(message) {
@@ -44,7 +53,7 @@ function displayMessage(message) {
     messageDiv.setAttribute("data-bs-placement", "top");
     messageDiv.setAttribute("title", "sent at: " + message.sent_at);
     messageDiv.appendChild(displayNameHTML(message.sent_by));
-    messageDiv.innerHTML += ": " + message.content;
+    messageDiv.innerHTML += messageContextHTML(message);
     document.getElementById("messageBoard").appendChild(messageDiv);
 }
 
@@ -72,6 +81,8 @@ function colourUpdate() {
 function focusOnMessageInput() {
     if (! /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
         document.getElementById("contentInput").focus();
+        console.log('focused');
+
     }
 }
 

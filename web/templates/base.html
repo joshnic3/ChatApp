@@ -19,7 +19,7 @@
           <div class="navbar-brand mx-auto p-0 fw-bold">{{ site_title }}</div>
         {% endif %}
         {% if user %}
-          <button type="button" class="btn btn-link btn-lg p-1 pt-0 pb-0 m-0 text-decoration-none fw-bold"  data-bs-toggle="modal" data-bs-target="#userModal" style="color:{{ user.colour }}">{{ user.display_name }}</button>
+          <div class="btn-lg p-1 pt-0 pb-0 m-0 text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#userModal" style="color:{{ user.colour }}">{{ user.display_name }}</div>
         {%endif %}
       </div>
     </nav>
@@ -45,10 +45,10 @@
 
         font-size: 30px;
       }
-      .btn:focus {
-        outline: none;
-        box-shadow: none;
-      }
+<!--      .btn:focus {-->
+<!--        outline: none;-->
+<!--        box-shadow: none;-->
+<!--      }-->
       <!--        font-family: '{{ site_font.brand }}', sans-serif  !important;-->
     </style>
 </html>
