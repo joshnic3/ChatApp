@@ -6,7 +6,11 @@
 
 
 {% block content %}
-    <ul id="messageBoard" class="list-group list-group-flush" style="max-height:100vh; overflow-y:scroll"></ul>
+    <ul id="messageBoard" class="list-group list-group-flush" style="max-height:100vh; overflow-y:scroll">
+        <li>
+            <img id="loadingImage" src="https://media0.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif?cid=790b76113b40e68505acb8da20ca05788576e2414b7bb377&amp;rid=giphy.gif&amp;ct=g" class="rounded mx-auto d-block w-75 p-5" alt="...">
+        </li>
+    </ul>
     <div class="form-floating mb-3">
         <input id="contentInput" type="text" class="form-control" placeholder="type a message" enterkeyhint="send" onsubmit="sendMessage()">
         <label for="contentInput">type a message</label>

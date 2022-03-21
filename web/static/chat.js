@@ -92,6 +92,7 @@ function displayMessages(data) {
     for (var message in data.messages) {
         displayMessage(data.messages[message]);
     }
+    document.getElementById("loadingImage").remove();
     scrollToBottom();
 }
 
